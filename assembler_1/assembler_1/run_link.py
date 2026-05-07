@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from assembler import assemble_file
 from linker import Linker
 from linker_script import LinkerScript
-from hex_emitter import write_raw_bin, write_verilog_hex
+from hex_emitter import write_raw_bin, write_verilog_hex, write_verilog_init
 
 
 def main():
@@ -40,6 +40,7 @@ def main():
                    help="Cikti taban adi (default: ilk kaynagin basename'i)")
     p.add_argument("--no-bin", action="store_true", help=".bin cikarma")
     p.add_argument("--no-hex", action="store_true", help=".hex cikarma")
+    p.add_argument("--no-vh",  action="store_true", help="Verilog init header (_init.vh) cikarma")
     p.add_argument("--word-size", type=int, default=4, help="Verilog hex word size (1/2/4)")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
@@ -118,6 +119,13 @@ def main():
         hex_path = out_base + ".hex"
         write_verilog_hex(ld.text_image, hex_path, word_size=args.word_size)
         print(f"  [HEX] {hex_path}")
+
+    if not args.no_vh:
+        vh_path = out_base + "_init.vh"
+        sources = " + ".join(os.path.basename(s) for s in args.sources)
+        write_verilog_init(ld.text_image, vh_path, var_name="mem",
+                            word_size=args.word_size, source_label=sources)
+        print(f"  [VH ] {vh_path}")
 
     map_path = out_base + ".map.txt"
     _write_map(ld, map_path)

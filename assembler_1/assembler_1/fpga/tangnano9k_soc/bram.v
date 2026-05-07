@@ -1,21 +1,26 @@
 // =============================================================
-// bram.v — Synchronous Block RAM with hardcoded init + $readmemh
+// bram.v — Synchronous Block RAM with toolchain-driven init
 // =============================================================
-// 32-bit word-addressed BRAM. Per-byte write-strobe destekler
-// (wstrb[i] = 1 ise i'inci byte yazilir).
+// 32-bit word-addressed BRAM. Per-byte write-strobe destekler.
 //
-// INIT STRATEJISI (iki katmanli):
-//   1) Hardcoded inline init: blink.hex icerigi initial bloga
-//      gomulu. Gowin GowinSynthesis $readmemh'yi sessizce yok
-//      sayarsa ya da blink.hex bulunamazsa bile BRAM dolu basliyor.
-//   2) $readmemh override: dosya bulunabilirse uzerine yazar.
+// INIT KAYNAGI: blink_init.vh
+//   Bu dosya `run_link.py` tarafindan otomatik uretilir
+//   (firmware/blink/build/blink_init.vh) ve bram.v'nin yaninda
+//   bulunmalidir. Icinde mem[i] = N'h... satirlari vardir.
 //
-// Yazilim degisikligi durumunda:
-//   - blink.hex'i firmware/blink/build/'den buraya kopyala
-//   - Asagidaki INLINE INIT bloguna yeni icerigi yapistir (bu
-//     blok firmware/blink/build/blink.hex ile birebir uyusmali)
+//   `$readmemh` Gowin GowinSynthesis tarafindan sessizce ignore
+//   edildigi icin onun yerine bu dosyayi `include` ediyoruz —
+//   sentez asamasinda BRAM init bitstream'a baglanir.
 //
-// Tang Nano 9K (Gowin GW1NR-9): 26 x 18Kbit BSRAM; 8KB icin 4 yeterli.
+// YAZILIM DEGISTIGINDE:
+//   1) python run_link.py ... -o firmware/blink/build/blink
+//      -> blink.hex + blink_init.vh (yeni) uretilir
+//   2) blink_init.vh'yi Gowin proje src/ klasorune kopyala
+//   3) Gowin: Run All
+//   bram.v'ye dokunmaya gerek yok.
+//
+// Tang Nano 9K (Gowin GW1NR-9): inferred BSRAM. Specifiye
+// edilmemis hucreler 0'a default'lanir (= ADDI x0,x0,0 = NOP).
 // =============================================================
 
 module bram #(
@@ -32,26 +37,12 @@ module bram #(
     reg [31:0] mem [0:(1<<ADDR_BITS)-1];
 
     initial begin
-        // NOT: for-loop ile 2048 hucreyi sifirlamak Gowin synth loop
-        // limitini (2000) asar. Gerek de yok: Gowin GowinSynthesis
-        // inferred BSRAM'da explicit init edilmemis hucreleri 0'a
-        // default'lar. Bu yuzden sadece program kodunu yazmak yeterli.
+        // Toolchain'in urettigi init verisi (blink_init.vh):
+        `include "blink_init.vh"
 
-        // ----- INLINE INIT (firmware/blink/build/blink.hex ile birebir) -----
-        mem[ 0] = 32'h100002b7;  // 0x00: LUI   t0, 0x10000   (GPIO base)
-        mem[ 1] = 32'h00000313;  // 0x04: ADDI  t1, x0, 0     (sayac)
-        mem[ 2] = 32'h0062a023;  // 0x08: SW    t1, 0(t0)     (LED'lere yaz)
-        mem[ 3] = 32'h00130313;  // 0x0C: ADDI  t1, t1, 1
-        mem[ 4] = 32'h008000ef;  // 0x10: JAL   ra, +8        (CALL delay_loop)
-        mem[ 5] = 32'hff5ff06f;  // 0x14: JAL   x0, -12       (J loop)
-        mem[ 6] = 32'h001003b7;  // 0x18: LUI   t2, 0x100     (delay_loop)
-        mem[ 7] = 32'hfff38393;  // 0x1C: ADDI  t2, t2, -1    (spin)
-        mem[ 8] = 32'hfe039ee3;  // 0x20: BNE   t2, x0, -4
-        mem[ 9] = 32'h00008067;  // 0x24: JALR  x0, x1, 0     (RET)
-        // -------------------------------------------------------------------
-
-        // Override: dosya bulunabilirse uzerine yaz. Gowin sessizce
-        // ignore ederse hardcoded degerler kalir; sorun olmaz.
+        // Yedek: bazi simulator'lar veya farkli synth tool'lari
+        // $readmemh'i destekliyor olabilir. Destekliyorsa override
+        // eder; etmiyorsa zarari yok.
         $readmemh(INIT_FILE, mem);
     end
 
