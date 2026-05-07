@@ -31,11 +31,11 @@ module bram #(
 );
     reg [31:0] mem [0:(1<<ADDR_BITS)-1];
 
-    integer i;
     initial begin
-        // Tum kelimeleri sifirla (NOP guvenligi: sifir = ADDI x0,x0,0)
-        for (i = 0; i < (1<<ADDR_BITS); i = i + 1)
-            mem[i] = 32'h00000000;
+        // NOT: for-loop ile 2048 hucreyi sifirlamak Gowin synth loop
+        // limitini (2000) asar. Gerek de yok: Gowin GowinSynthesis
+        // inferred BSRAM'da explicit init edilmemis hucreleri 0'a
+        // default'lar. Bu yuzden sadece program kodunu yazmak yeterli.
 
         // ----- INLINE INIT (firmware/blink/build/blink.hex ile birebir) -----
         mem[ 0] = 32'h100002b7;  // 0x00: LUI   t0, 0x10000   (GPIO base)
