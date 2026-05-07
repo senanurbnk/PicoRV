@@ -1,0 +1,24 @@
+
+  ========================================================================
+  LINK MAP
+  ========================================================================
+  Script: LinkerScript(text=0x00000000+8192, data=0x00002000+8192, entry='_start')
+
+  Section Bases:
+    .text    0x00000000 - 0x00000018  (  24B)  firmware/blink/main.o.json
+    .text    0x00000018 - 0x00000028  (  16B)  firmware/blink/delay.o.json
+
+  Symbols (defined):
+    _start           0x00000000  GLOBAL  .text     firmware/blink/main.o.json
+    loop             0x00000008  LOCAL   .text     firmware/blink/main.o.json
+    delay_loop       0x00000018  GLOBAL  .text     firmware/blink/delay.o.json
+    spin             0x0000001C  LOCAL   .text     firmware/blink/delay.o.json
+
+  Entry: _start @ 0x00000000
+
+  Relocations applied (1):
+    firmware/blink/main.o.json .text@0x0010 R_RISCV_JAL            sym='delay_loop' resolved=0x00000018 patch_abs=0x00000010 old=0x000000EF new=0x008000EF
+
+  text_image: 40 bytes @ 0x00000000
+  data_image: 0 bytes @ 0x00002000
+  ========================================================================

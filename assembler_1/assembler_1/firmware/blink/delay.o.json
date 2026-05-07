@@ -1,0 +1,28 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "delay.s",
+  "sections": {
+    ".text": {
+      "size": 16,
+      "data": "B7 03 10 00 93 83 F3 FF E3 9E 03 FE 67 80 00 00"
+    }
+  },
+  "symbols": [
+    {
+      "name": "delay_loop",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    },
+    {
+      "name": "spin",
+      "section": ".text",
+      "offset": 4,
+      "binding": "LOCAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}
