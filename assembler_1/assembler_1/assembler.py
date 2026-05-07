@@ -1,8 +1,13 @@
 from opcode_table import OpcodeTable, PSEUDO_INSTRUCTIONS
-from symbol_table import SymbolTable
+from symbol_table import SymbolTable, BINDING_LOCAL, BINDING_GLOBAL
 from register_table import RegisterTable
 from parser import Parser
 from encoder import Encoder
+from object_format import (
+    ObjectFile, Section, Symbol, Relocation,
+    R_RISCV_BRANCH, R_RISCV_JAL,
+    SECTION_TEXT, SECTION_DATA, SECTION_ABS,
+)
 
 
 class AssemblerError:
@@ -37,6 +42,8 @@ class Assembler:
         self._program_name = ""
         self._start_address = 0
         self._program_length = 0
+        self._relocations = []          # [{abs_addr, section, type, symbol, line_num}]
+        self._current_section_p2 = None # _branch_target relocation icin pass 2'de set edilir
 
     def assemble(self, source_lines, program_name="PROG", start_address=0):
         self._program_name = program_name
@@ -44,10 +51,13 @@ class Assembler:
         self._intermediate = []
         self._object_codes = []
         self._errors = []
+        self._relocations = []
         self._symtab.clear()
 
         self._pass1(source_lines)
 
+        # get_undefined_symbols artik sadece LOCAL+undefined dondurur;
+        # GLOBAL+undefined olan extern'ler linker'in sorumlulugundadir.
         for sym in self._symtab.get_undefined_symbols():
             self._errors.append(AssemblerError(sym.line_num, f"Tanımsız sembol: '{sym.name}'"))
 
@@ -115,7 +125,11 @@ class Assembler:
     def _directive_length(self, pl):
         m = pl.mnemonic
         ops = pl.operands
-        if m in (".text", ".data", ".globl", ".global", ".section", ".end"):
+        if m in (".globl", ".global"):
+            for name in ops:
+                self._symtab.mark_global(name, pl.line_num)
+            return 0
+        if m in (".text", ".data", ".section", ".end"):
             return 0
         if m == ".word":  return 4 * max(len(ops), 1)
         if m == ".half":  return 2 * max(len(ops), 1)
@@ -138,6 +152,8 @@ class Assembler:
             if pl is None or pl.line_type in ("empty", "label_only") or entry.error:
                 continue
 
+            self._current_section_p2 = entry.section
+
             if pl.line_type == "directive":
                 self._encode_directive(entry)
                 continue
@@ -153,6 +169,15 @@ class Assembler:
                 elif not entry.error:
                     self._errors.append(AssemblerError(
                         pl.line_num, f"Kodlama hatası: '{pl.raw_line.strip()}'"))
+
+    def _add_relocation(self, instr_addr, reloc_type, symbol, pl):
+        self._relocations.append({
+            "abs_addr": instr_addr,
+            "section": self._current_section_p2,
+            "type": reloc_type,
+            "symbol": symbol,
+            "line_num": pl.line_num if pl else 0,
+        })
 
     def _encode_instruction(self, pl, current_addr):
         mnem = pl.mnemonic
@@ -179,7 +204,7 @@ class Assembler:
 
             if fmt == "B":
                 rs1, rs2 = self._reg(ops,0,pl), self._reg(ops,1,pl)
-                imm = self._branch_target(ops, 2, current_addr, pl)
+                imm = self._branch_target(ops, 2, current_addr, pl, R_RISCV_BRANCH)
                 if None in (rs1, rs2, imm): return None
                 return self._encoder.encode_instruction(mnem, rs1=rs1, rs2=rs2, imm=imm)
 
@@ -191,7 +216,7 @@ class Assembler:
 
             if fmt == "J":
                 rd  = self._reg(ops, 0, pl)
-                imm = self._branch_target(ops, 1, current_addr, pl)
+                imm = self._branch_target(ops, 1, current_addr, pl, R_RISCV_JAL)
                 if None in (rd, imm): return None
                 return self._encoder.encode_instruction(mnem, rd=rd, imm=imm)
 
@@ -247,7 +272,7 @@ class Assembler:
             if None in (rd, rs): return None
             return self._encoder.encode_instruction("SUB", rd=rd, rs1=0, rs2=rs)
         if m == "J":
-            imm = self._branch_target(ops, 0, current_addr, pl)
+            imm = self._branch_target(ops, 0, current_addr, pl, R_RISCV_JAL)
             if imm is None: return None
             return self._encoder.encode_instruction("JAL", rd=0, imm=imm)
         if m == "JR":
@@ -257,17 +282,17 @@ class Assembler:
         if m == "RET":
             return self._encoder.encode_instruction("JALR", rd=0, rs1=1, imm=0)
         if m == "CALL":
-            imm = self._branch_target(ops, 0, current_addr, pl)
+            imm = self._branch_target(ops, 0, current_addr, pl, R_RISCV_JAL)
             if imm is None: return None
             return self._encoder.encode_instruction("JAL", rd=1, imm=imm)
         if m == "BEQZ":
             rs  = self._reg(ops, 0, pl)
-            imm = self._branch_target(ops, 1, current_addr, pl)
+            imm = self._branch_target(ops, 1, current_addr, pl, R_RISCV_BRANCH)
             if None in (rs, imm): return None
             return self._encoder.encode_instruction("BEQ", rs1=rs, rs2=0, imm=imm)
         if m == "BNEZ":
             rs  = self._reg(ops, 0, pl)
-            imm = self._branch_target(ops, 1, current_addr, pl)
+            imm = self._branch_target(ops, 1, current_addr, pl, R_RISCV_BRANCH)
             if None in (rs, imm): return None
             return self._encoder.encode_instruction("BNE", rs1=rs, rs2=0, imm=imm)
         return None
@@ -316,14 +341,19 @@ class Assembler:
         self._errors.append(AssemblerError(pl.line_num, f"offset(reg) bekleniyor: '{ops[idx].raw}'"))
         return None
 
-    def _branch_target(self, ops, idx, current_addr, pl):
+    def _branch_target(self, ops, idx, current_addr, pl, reloc_type=None):
         if idx >= len(ops):
             self._errors.append(AssemblerError(pl.line_num, "Eksik dallanma hedefi"))
             return None
         op = ops[idx]
         if op.op_type == "symbol":
-            addr = self._symtab.get_address(op.symbol)
-            if addr is not None: return addr - current_addr
+            sym = self._symtab.lookup(op.symbol)
+            if sym is not None and sym.defined:
+                return sym.address - current_addr
+            if sym is not None and sym.is_external() and reloc_type is not None:
+                # Extern: imm=0 placeholder, linker'a relocation birak
+                self._add_relocation(current_addr, reloc_type, op.symbol, pl)
+                return 0
             self._errors.append(AssemblerError(pl.line_num, f"Tanımsız hedef: '{op.symbol}'"))
             return None
         if op.op_type == "immediate":
@@ -402,6 +432,107 @@ class Assembler:
             f.write(data)
         print(f"\n  Binary: {filename} ({len(data)} byte)")
 
+    # ── Linker icin yapili nesne dosyasi (.o.json) ──
+
+    def _section_layout(self):
+        """Pass 2 sonunda her section'in ilk adresini ve toplam boyutunu hesaplar.
+        Yalnizca uretilebilir section'lar (.text, .data) doner."""
+        first = {}
+        size = {}
+        for e in self._intermediate:
+            if e.error or e.length == 0:
+                continue
+            sec = e.section
+            if sec not in (SECTION_TEXT, SECTION_DATA):
+                continue
+            if sec not in first:
+                first[sec] = e.address
+                size[sec] = 0
+            end_offset = (e.address - first[sec]) + e.length
+            if end_offset > size[sec]:
+                size[sec] = end_offset
+        return first, size
+
+    def to_object_file(self, source_name=""):
+        """Mevcut assembly sonuclarini ObjectFile yapisina donusturur.
+        Symbol offset'leri ve relocation offset'leri section-relative'dir."""
+        first, size = self._section_layout()
+        obj = ObjectFile(source=source_name)
+
+        # Section veri tamponlarini ayir
+        for sec, sz in size.items():
+            obj.sections[sec] = Section(name=sec, size=sz, data=bytes(sz))
+
+        # Object code'lari section'lara dagit (32-bit LE)
+        addr_to_section = {}
+        addr_to_length = {}
+        for e in self._intermediate:
+            if e.error or e.length == 0:
+                continue
+            addr_to_section[e.address] = e.section
+            addr_to_length[e.address] = e.length
+
+        section_buffers = {sec: bytearray(obj.sections[sec].data) for sec in obj.sections}
+        for addr, code in self._object_codes:
+            sec = addr_to_section.get(addr)
+            if sec not in section_buffers:
+                continue
+            offset = addr - first[sec]
+            buf = section_buffers[sec]
+            for i, b in enumerate(self._encoder.to_bytes_le(code)):
+                if 0 <= offset + i < len(buf):
+                    buf[offset + i] = b
+        for sec in obj.sections:
+            obj.sections[sec].data = bytes(section_buffers[sec])
+
+        # Sembolleri kopyala (section-relative offset)
+        for entry in self._symtab.all_entries():
+            if entry.error:
+                continue
+            if entry.defined:
+                if entry.section == SECTION_ABS:
+                    sym_section = SECTION_ABS
+                    offset = entry.address
+                elif entry.section in first:
+                    sym_section = entry.section
+                    offset = entry.address - first[entry.section]
+                else:
+                    # Section'ina denk gelen kod uretilmemis (mesela bos .data)
+                    sym_section = entry.section
+                    offset = 0
+            else:
+                sym_section = None
+                offset = 0
+            obj.symbols.append(Symbol(
+                name=entry.name,
+                section=sym_section,
+                offset=offset,
+                binding=entry.binding,
+                defined=entry.defined,
+            ))
+
+        # Relocation'lari section-relative'e cevir
+        for r in self._relocations:
+            sec = r["section"]
+            base = first.get(sec, 0)
+            obj.relocations.append(Relocation(
+                section=sec,
+                offset=r["abs_addr"] - base,
+                type=r["type"],
+                symbol=r["symbol"],
+                addend=0,
+            ))
+
+        return obj
+
+    def write_object(self, filename, source_name=""):
+        obj = self.to_object_file(source_name=source_name)
+        obj.write(filename)
+        print(f"\n  Object: {filename} "
+              f"(.text={obj.sections.get('.text').size if '.text' in obj.sections else 0}B, "
+              f"sym={len(obj.symbols)}, reloc={len(obj.relocations)})")
+        return obj
+
 
 
 def assemble_file(asm_path, program_name=None, start_address=0):
@@ -457,7 +588,7 @@ def write_report(asm, success, txt_path):
 
 
 def assemble_and_save(asm_path, out_dir=None, program_name=None, start_address=0,
-                      write_bin=True, write_txt=True, verbose=True):
+                      write_bin=True, write_txt=True, write_obj=True, verbose=True):
     import os
 
     asm_path = str(asm_path)
@@ -469,6 +600,7 @@ def assemble_and_save(asm_path, out_dir=None, program_name=None, start_address=0
 
     bin_path = os.path.join(out_dir, base + ".bin") if write_bin else None
     txt_path = os.path.join(out_dir, base + ".txt") if write_txt else None
+    obj_path = os.path.join(out_dir, base + ".o.json") if write_obj else None
 
     asm, success = assemble_file(asm_path, program_name=program_name,
                                   start_address=start_address)
@@ -483,6 +615,11 @@ def assemble_and_save(asm_path, out_dir=None, program_name=None, start_address=0
         asm.write_binary(bin_path)
         if verbose:
             print(f"  [BIN] → {bin_path}")
+
+    if write_obj and success:
+        asm.write_object(obj_path, source_name=os.path.basename(asm_path))
+        if verbose:
+            print(f"  [OBJ] → {obj_path}")
 
     if write_txt:
         write_report(asm, success, txt_path)

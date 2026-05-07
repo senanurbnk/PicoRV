@@ -1,0 +1,43 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "main.s",
+  "sections": {
+    ".text": {
+      "size": 12,
+      "data": "13 05 A0 00 EF 00 00 00 6F 00 00 00"
+    }
+  },
+  "symbols": [
+    {
+      "name": "_start",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    },
+    {
+      "name": "add5",
+      "section": null,
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": false
+    },
+    {
+      "name": "done",
+      "section": ".text",
+      "offset": 8,
+      "binding": "LOCAL",
+      "defined": true
+    }
+  ],
+  "relocations": [
+    {
+      "section": ".text",
+      "offset": 4,
+      "type": "R_RISCV_JAL",
+      "symbol": "add5",
+      "addend": 0
+    }
+  ]
+}

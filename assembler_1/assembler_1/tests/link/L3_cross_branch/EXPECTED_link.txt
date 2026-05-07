@@ -1,0 +1,44 @@
+L-3 Beklenen Link Sonucu (Cross-file R_RISCV_BRANCH)
+=====================================================
+
+Pass 1 (Layout):
+    ping.text base = 0x00000000  size = 12  (0x0C)
+    pong.text base = 0x0000000C  size = 8   (0x14 sona)
+
+Global symbol table:
+    _start  abs = 0x00000000  (ping.text + 0)
+    pong    abs = 0x0000000C  (pong.text + 0)
+
+Pass 2 (Relocation):
+    ping.o reloc: section=.text, offset=4, type=R_RISCV_BRANCH, symbol=pong
+
+    PC = ping.text_base + 4 = 0x00000004
+    target = pong abs = 0x0000000C
+    disp = target - PC = 0x00000008 = +8
+
+    BEQ a0, x0, +8 encoding (B-format):
+        imm[12]   = 0
+        imm[10:5] = 0
+        imm[4:1]  = 0100  (= 4, since byte +8 has bit 3 set)
+        imm[11]   = 0
+        rs2 = x0, rs1 = a0 (=10), funct3 = 000, opcode = 0x63
+
+        sum = (4 << 8) | (10 << 15) | 0x63
+            = 0x00000400 | 0x00050000 | 0x00000063
+            = 0x00050463
+
+    LE bytes patched at ping.text offset 4:  63 04 05 00
+
+Final image (.text, 20 bytes):
+    Addr     Bytes (LE)               Disasm
+    -------- ------------------------ ----------------------------
+    00000000 13 05 00 00              ADDI a0, x0, 0       ; LI a0,0
+    00000004 63 04 05 00              BEQ  a0, x0, +8      ; -> pong @ 0x0C
+    00000008 6F 00 00 00              JAL  x0, +0          ; halt
+    0000000C 13 05 30 06              ADDI a0, x0, 99      ; LI a0,99
+    00000010 6F F0 DF FF              JAL  x0, -4          ; pong self-loop
+                                       (= 0xFFDFF06F: imm[20]=1, imm[19:12]=FF,
+                                          imm[11]=1, imm[10:1]=0x3FE, imm[0]=0
+                                          -> 21-bit signed = -4)
+
+Entry point = _start = 0x00000000

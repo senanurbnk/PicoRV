@@ -1,0 +1,21 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "func.s",
+  "sections": {
+    ".text": {
+      "size": 8,
+      "data": "13 05 55 00 67 80 00 00"
+    }
+  },
+  "symbols": [
+    {
+      "name": "add5",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}

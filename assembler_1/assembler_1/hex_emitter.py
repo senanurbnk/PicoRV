@@ -1,0 +1,77 @@
+"""
+Hex / Binary Cikis Formatlari
+==============================
+Linker'in urettigi flat bellek imajini farkli formatlara cevirir.
+
+* raw_bin     -> Olduğu gibi byte dizisi (.bin). FPGA flash veya
+                 dogrudan BRAM init icin.
+* verilog_hex -> Verilog $readmemh formati. Satir basina bir 32-bit
+                 word, hex string. Vivado/Quartus/Gowin BRAM init
+                 dosyasi olarak okunabilir.
+* intel_hex   -> Standart Intel HEX (opsiyonel; bircok programci
+                 araci destekler).
+"""
+
+
+def to_raw_bin(image: bytes) -> bytes:
+    return bytes(image)
+
+
+def to_verilog_hex(image: bytes, word_size: int = 4, with_addr_comment: bool = False,
+                   base_addr: int = 0) -> str:
+    """Image'i 32-bit (varsayilan) word'ler halinde, satir basina bir
+    hex string olarak yazar. Komut tarafsiz: little-endian'da depolanmis
+    image'i memory-word formatina cevirir."""
+    if word_size not in (1, 2, 4):
+        raise ValueError("word_size 1, 2 veya 4 olmali")
+    digits = word_size * 2
+    lines = []
+    for i in range(0, len(image), word_size):
+        word = 0
+        for j in range(word_size):
+            if i + j < len(image):
+                word |= image[i + j] << (j * 8)
+        if with_addr_comment:
+            lines.append(f"@{(base_addr + i) // word_size:08x} {word:0{digits}x}")
+        else:
+            lines.append(f"{word:0{digits}x}")
+    return "\n".join(lines) + ("\n" if lines else "")
+
+
+def write_raw_bin(image: bytes, path: str) -> str:
+    with open(path, "wb") as f:
+        f.write(to_raw_bin(image))
+    return path
+
+
+def write_verilog_hex(image: bytes, path: str, word_size: int = 4,
+                      with_addr_comment: bool = False, base_addr: int = 0) -> str:
+    text = to_verilog_hex(image, word_size=word_size,
+                          with_addr_comment=with_addr_comment, base_addr=base_addr)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    return path
+
+
+def to_intel_hex(image: bytes, base_addr: int = 0) -> str:
+    """Cok basit Intel HEX cikisi: satir basina 16 byte data record + EOF.
+    Extended Linear Address record'lari sadece base_addr 64KB'i asarsa
+    eklenir (bu projemiz icin gereksiz; iskele halinde tutuldu)."""
+    lines = []
+    chunk = 16
+    upper = -1
+    for off in range(0, len(image), chunk):
+        addr = base_addr + off
+        new_upper = (addr >> 16) & 0xFFFF
+        if new_upper != upper:
+            upper = new_upper
+            cs = (2 + 4 + (upper >> 8) + (upper & 0xFF)) & 0xFF
+            cs = ((-cs) & 0xFF)
+            lines.append(f":02000004{upper:04X}{cs:02X}")
+        data = image[off:off+chunk]
+        n = len(data)
+        rec = bytes([n, (addr >> 8) & 0xFF, addr & 0xFF, 0x00]) + data
+        cs = (-sum(rec)) & 0xFF
+        lines.append(":" + rec.hex().upper() + f"{cs:02X}")
+    lines.append(":00000001FF")
+    return "\n".join(lines) + "\n"

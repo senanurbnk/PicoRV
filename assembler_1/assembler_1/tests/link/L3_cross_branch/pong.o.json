@@ -1,0 +1,21 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "pong.s",
+  "sections": {
+    ".text": {
+      "size": 8,
+      "data": "13 05 30 06 6F F0 DF FF"
+    }
+  },
+  "symbols": [
+    {
+      "name": "pong",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}

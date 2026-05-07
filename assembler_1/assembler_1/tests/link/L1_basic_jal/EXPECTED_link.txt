@@ -1,0 +1,45 @@
+L-1 Beklenen Link Sonucu
+========================
+
+Linker script:
+    .text origin = 0x00000000
+
+Pass 1 (Layout):
+    main.text  base = 0x00000000  size = 12  (0x0C)
+    func.text  base = 0x0000000C  size = 8   (0x14 sona)
+
+Global symbol table:
+    _start   abs = 0x00000000  (main.text + 0)
+    add5     abs = 0x0000000C  (func.text + 0)
+    done     LOCAL, link sonrasi gozukmez ama main.text + 8 = 0x00000008
+
+Pass 2 (Relocation):
+    main.o reloc: section=.text, offset=4, type=R_RISCV_JAL, symbol=add5
+
+    PC = main.text_base + 4 = 0x00000004
+    target = add5 abs = 0x0000000C
+    offset = target - PC = 0x00000008 = +8
+
+    JAL ra, +8 encoding (J-format):
+        imm[20]   = 0
+        imm[10:1] = 0000000100  (= 4, since byte 8 = bit3=1)
+        imm[11]   = 0
+        imm[19:12]= 00000000
+        rd = 1, opcode = 1101111
+
+        sum = (4 << 21) | (1 << 7) | 0x6F
+            = 0x00800000 | 0x80 | 0x6F
+            = 0x008000EF
+
+    LE bytes patched at main.text offset 4:  EF 00 80 00
+
+Final image (.text, 20 bytes):
+    Addr     Bytes (LE)               Disasm
+    -------- ------------------------ ----------------------------
+    00000000 13 05 A0 00              ADDI a0, x0, 10     ; LI a0,10
+    00000004 EF 00 80 00              JAL  ra, +8         ; -> 0x0C
+    00000008 6F 00 00 00              JAL  x0, +0         ; halt
+    0000000C 13 05 55 00              ADDI a0, a0, 5
+    00000010 67 80 00 00              JALR x0, x1, 0      ; RET
+
+Entry point = _start = 0x00000000

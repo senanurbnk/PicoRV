@@ -1,4 +1,7 @@
 from opcode_table import OpcodeTable
+from bit_layout import (
+    pack_b_imm, pack_j_imm, pack_i_imm, pack_s_imm, pack_u_imm,
+)
 
 
 class Encoder:
@@ -12,37 +15,24 @@ class Encoder:
                 (rd & 0x1F) << 7 | (opcode & 0x7F))
 
     def encode_i_type(self, opcode, rd, funct3, rs1, imm):
-        return ((imm & 0xFFF) << 20 | (rs1 & 0x1F) << 15 |
+        return (pack_i_imm(imm) | (rs1 & 0x1F) << 15 |
                 (funct3 & 0x07) << 12 | (rd & 0x1F) << 7 | (opcode & 0x7F))
 
     def encode_s_type(self, opcode, funct3, rs1, rs2, imm):
-        imm_hi = (imm >> 5) & 0x7F
-        imm_lo = imm & 0x1F
-        return ((imm_hi & 0x7F) << 25 | (rs2 & 0x1F) << 20 |
+        return (pack_s_imm(imm) | (rs2 & 0x1F) << 20 |
                 (rs1 & 0x1F) << 15 | (funct3 & 0x07) << 12 |
-                (imm_lo & 0x1F) << 7 | (opcode & 0x7F))
+                (opcode & 0x7F))
 
     def encode_b_type(self, opcode, funct3, rs1, rs2, imm):
-        b12   = (imm >> 12) & 0x1
-        b11   = (imm >> 11) & 0x1
-        b10_5 = (imm >> 5)  & 0x3F
-        b4_1  = (imm >> 1)  & 0xF
-        return ((b12 & 0x1) << 31 | (b10_5 & 0x3F) << 25 |
-                (rs2 & 0x1F) << 20 | (rs1 & 0x1F) << 15 |
-                (funct3 & 0x07) << 12 | (b4_1 & 0xF) << 8 |
-                (b11 & 0x1) << 7 | (opcode & 0x7F))
+        return (pack_b_imm(imm) | (rs2 & 0x1F) << 20 |
+                (rs1 & 0x1F) << 15 | (funct3 & 0x07) << 12 |
+                (opcode & 0x7F))
 
     def encode_u_type(self, opcode, rd, imm):
-        return ((imm & 0xFFFFF) << 12 | (rd & 0x1F) << 7 | (opcode & 0x7F))
+        return (pack_u_imm(imm) | (rd & 0x1F) << 7 | (opcode & 0x7F))
 
     def encode_j_type(self, opcode, rd, imm):
-        b20    = (imm >> 20) & 0x1
-        b19_12 = (imm >> 12) & 0xFF
-        b11    = (imm >> 11) & 0x1
-        b10_1  = (imm >> 1)  & 0x3FF
-        return ((b20 & 0x1) << 31 | (b10_1 & 0x3FF) << 21 |
-                (b11 & 0x1) << 20 | (b19_12 & 0xFF) << 12 |
-                (rd & 0x1F) << 7 | (opcode & 0x7F))
+        return (pack_j_imm(imm) | (rd & 0x1F) << 7 | (opcode & 0x7F))
 
     # ── Yüksek seviye encoding ──
 
