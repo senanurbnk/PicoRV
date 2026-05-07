@@ -1,14 +1,21 @@
 // =============================================================
-// bram.v — Synchronous Block RAM (init from $readmemh)
+// bram.v — Synchronous Block RAM with hardcoded init + $readmemh
 // =============================================================
 // 32-bit word-addressed BRAM. Per-byte write-strobe destekler
-// (wstrb[i] = 1 ise i'inci byte yazilir). Init dosyasi Verilog
-// $readmemh formatinda olmali — bizim hex_emitter.write_verilog_hex
-// fonksiyonumuzun urettigi format buna uyar.
+// (wstrb[i] = 1 ise i'inci byte yazilir).
 //
-// Tang Nano 9K (Gowin GW1NR-9): 26 x 18Kbit Block RAM
-//   8 KB icin 4 BSRAM yetiyor. Senkron okuma (1-cycle latency)
-//   Gowin'in BSRAM'ina dogal infer edilir.
+// INIT STRATEJISI (iki katmanli):
+//   1) Hardcoded inline init: blink.hex icerigi initial bloga
+//      gomulu. Gowin GowinSynthesis $readmemh'yi sessizce yok
+//      sayarsa ya da blink.hex bulunamazsa bile BRAM dolu basliyor.
+//   2) $readmemh override: dosya bulunabilirse uzerine yazar.
+//
+// Yazilim degisikligi durumunda:
+//   - blink.hex'i firmware/blink/build/'den buraya kopyala
+//   - Asagidaki INLINE INIT bloguna yeni icerigi yapistir (bu
+//     blok firmware/blink/build/blink.hex ile birebir uyusmali)
+//
+// Tang Nano 9K (Gowin GW1NR-9): 26 x 18Kbit BSRAM; 8KB icin 4 yeterli.
 // =============================================================
 
 module bram #(
@@ -24,10 +31,27 @@ module bram #(
 );
     reg [31:0] mem [0:(1<<ADDR_BITS)-1];
 
+    integer i;
     initial begin
-        // Path is relative to Gowin proje kok klasoru; Gowin'de
-        // INIT_FILE'i tam yolla geçirmek istersen project ayarlarinda
-        // SourcePath duzenle.
+        // Tum kelimeleri sifirla (NOP guvenligi: sifir = ADDI x0,x0,0)
+        for (i = 0; i < (1<<ADDR_BITS); i = i + 1)
+            mem[i] = 32'h00000000;
+
+        // ----- INLINE INIT (firmware/blink/build/blink.hex ile birebir) -----
+        mem[ 0] = 32'h100002b7;  // 0x00: LUI   t0, 0x10000   (GPIO base)
+        mem[ 1] = 32'h00000313;  // 0x04: ADDI  t1, x0, 0     (sayac)
+        mem[ 2] = 32'h0062a023;  // 0x08: SW    t1, 0(t0)     (LED'lere yaz)
+        mem[ 3] = 32'h00130313;  // 0x0C: ADDI  t1, t1, 1
+        mem[ 4] = 32'h008000ef;  // 0x10: JAL   ra, +8        (CALL delay_loop)
+        mem[ 5] = 32'hff5ff06f;  // 0x14: JAL   x0, -12       (J loop)
+        mem[ 6] = 32'h001003b7;  // 0x18: LUI   t2, 0x100     (delay_loop)
+        mem[ 7] = 32'hfff38393;  // 0x1C: ADDI  t2, t2, -1    (spin)
+        mem[ 8] = 32'hfe039ee3;  // 0x20: BNE   t2, x0, -4
+        mem[ 9] = 32'h00008067;  // 0x24: JALR  x0, x1, 0     (RET)
+        // -------------------------------------------------------------------
+
+        // Override: dosya bulunabilirse uzerine yaz. Gowin sessizce
+        // ignore ederse hardcoded degerler kalir; sorun olmaz.
         $readmemh(INIT_FILE, mem);
     end
 
