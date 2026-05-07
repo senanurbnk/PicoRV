@@ -37,8 +37,14 @@ module bram #(
     reg [31:0] mem [0:(1<<ADDR_BITS)-1];
 
     initial begin
-        // Toolchain'in urettigi init verisi (blink_init.vh):
+        // Toolchain'in urettigi init verisi (blink_init.vh).
+        // Header guard: dosya STANDALONE compile edilirse (Gowin'in
+        // dosyayi project source olarak ekleme aliskanligi nedeniyle)
+        // BRAM_INIT_LOAD tanimli olmaz, icerik atlanir; sadece bu
+        // include yolu ile aktif olur.
+        `define BRAM_INIT_LOAD
         `include "blink_init.vh"
+        `undef BRAM_INIT_LOAD
 
         // Yedek: bazi simulator'lar veya farkli synth tool'lari
         // $readmemh'i destekliyor olabilir. Destekliyorsa override
