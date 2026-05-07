@@ -5,7 +5,7 @@
   "sections": {
     ".text": {
       "size": 16,
-      "data": "B7 03 10 00 93 83 F3 FF E3 9E 03 FE 67 80 00 00"
+      "data": "B7 03 40 00 93 83 F3 FF E3 9E 03 FE 67 80 00 00"
     }
   },
   "symbols": [
