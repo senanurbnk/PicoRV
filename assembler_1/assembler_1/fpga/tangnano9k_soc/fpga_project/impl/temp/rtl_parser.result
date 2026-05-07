@@ -1,0 +1,88 @@
+[
+ {
+  "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+  "InstLine" : 2174,
+  "InstName" : "picorv32_regs",
+  "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+  "ModuleLine" : 2174,
+  "ModuleName" : "picorv32_regs"
+ },
+ {
+  "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+  "InstLine" : 2517,
+  "InstName" : "picorv32_axi",
+  "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+  "ModuleLine" : 2517,
+  "ModuleName" : "picorv32_axi",
+  "SubInsts" : [
+   {
+    "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "InstLine" : 2619,
+    "InstName" : "axi_adapter",
+    "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "ModuleLine" : 2731,
+    "ModuleName" : "picorv32_axi_adapter"
+   },
+   {
+    "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "InstLine" : 2674,
+    "InstName" : "picorv32_core",
+    "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "ModuleLine" : 62,
+    "ModuleName" : "picorv32"
+   }
+  ]
+ },
+ {
+  "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+  "InstLine" : 2815,
+  "InstName" : "picorv32_wb",
+  "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+  "ModuleLine" : 2815,
+  "ModuleName" : "picorv32_wb",
+  "SubInsts" : [
+   {
+    "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "InstLine" : 2938,
+    "InstName" : "picorv32_core",
+    "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "ModuleLine" : 62,
+    "ModuleName" : "picorv32"
+   }
+  ]
+ },
+ {
+  "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/soc_top.v",
+  "InstLine" : 21,
+  "InstName" : "soc_top",
+  "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/soc_top.v",
+  "ModuleLine" : 21,
+  "ModuleName" : "soc_top",
+  "SubInsts" : [
+   {
+    "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/soc_top.v",
+    "InstLine" : 68,
+    "InstName" : "u_bram",
+    "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/bram.v",
+    "ModuleLine" : 21,
+    "ModuleName" : "bram"
+   },
+   {
+    "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/soc_top.v",
+    "InstLine" : 82,
+    "InstName" : "u_gpio",
+    "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/gpio.v",
+    "ModuleLine" : 12,
+    "ModuleName" : "gpio"
+   },
+   {
+    "InstFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/soc_top.v",
+    "InstLine" : 143,
+    "InstName" : "u_cpu",
+    "ModuleFile" : "C:/Users/recep/OneDrive/Desktop/PicoRV/assembler_1/assembler_1/fpga/tangnano9k_soc/fpga_project/src/picorv32.v",
+    "ModuleLine" : 62,
+    "ModuleName" : "picorv32"
+   }
+  ]
+ }
+]
