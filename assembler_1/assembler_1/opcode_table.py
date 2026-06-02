@@ -28,17 +28,20 @@ class OpcodeTable:
         self._add(OpcodeEntry("SUB",  "R", R, funct3=0b000, funct7=0b0100000, description="rd = rs1 - rs2"))
         self._add(OpcodeEntry("AND",  "R", R, funct3=0b111, funct7=0b0000000, description="rd = rs1 & rs2"))
         self._add(OpcodeEntry("OR",   "R", R, funct3=0b110, funct7=0b0000000, description="rd = rs1 | rs2"))
+        self._add(OpcodeEntry("XOR",  "R", R, funct3=0b100, funct7=0b0000000, description="rd = rs1 ^ rs2"))
         self._add(OpcodeEntry("SLT",  "R", R, funct3=0b010, funct7=0b0000000, description="rd = (rs1 < rs2) ? 1 : 0"))
 
         IA = 0b0010011
         self._add(OpcodeEntry("ADDI", "I", IA, funct3=0b000, description="rd = rs1 + imm"))
         self._add(OpcodeEntry("ANDI", "I", IA, funct3=0b111, description="rd = rs1 & imm"))
+        self._add(OpcodeEntry("XORI", "I", IA, funct3=0b100, description="rd = rs1 ^ imm"))
         self._add(OpcodeEntry("SLLI", "I", IA, funct3=0b001, funct7=0b0000000, description="rd = rs1 << shamt"))
         self._add(OpcodeEntry("SRLI", "I", IA, funct3=0b101, funct7=0b0000000, description="rd = rs1 >> shamt (logical)"))
 
         IL = 0b0000011
         self._add(OpcodeEntry("LW",   "I", IL, funct3=0b010, description="rd = mem[rs1+imm][31:0]"))
         self._add(OpcodeEntry("LB",   "I", IL, funct3=0b000, description="rd = sign_ext(mem[rs1+imm][7:0])"))
+        self._add(OpcodeEntry("LBU",  "I", IL, funct3=0b100, description="rd = zero_ext(mem[rs1+imm][7:0])"))
 
         self._add(OpcodeEntry("JALR", "I", 0b1100111, funct3=0b000, description="rd = PC+4; PC = (rs1+imm) & ~1"))
 
@@ -77,7 +80,7 @@ class OpcodeTable:
 
     def print_table(self):
         print(f"\n{'='*80}")
-        print(f"{'OPCODE TABLE (OPTAB) — 20 Komutluk Alt Küme':^80}")
+        print(f"{f'OPCODE TABLE (OPTAB) — {self.size()} Komutluk RV32I Alt Kümesi':^80}")
         print(f"{'='*80}")
         print(f"{'Mnemonic':<8} {'Fmt':<4} {'Opcode':>9} {'funct3':>8} {'funct7':>11}  {'Açıklama'}")
         print(f"{'-'*80}")
