@@ -1,0 +1,6 @@
+# Uygulama linker script — UART'tan 0x3000'e yüklenir
+TEXT_ORIGIN = 0x00003000
+TEXT_LENGTH = 0x00000800
+DATA_ORIGIN = 0x00003800
+DATA_LENGTH = 0x00000800
+ENTRY       = _start

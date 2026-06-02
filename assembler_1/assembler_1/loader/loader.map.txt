@@ -1,0 +1,28 @@
+
+  ========================================================================
+  LINK MAP
+  ========================================================================
+  Script: LinkerScript(text=0x00000000+4096, data=0x00001000+4096, entry='_start')
+
+  Section Bases:
+    .text    0x00000000 - 0x00000148  ( 328B)  C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+
+  Symbols (defined):
+    _start           0x00000000  GLOBAL  .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    find_aa          0x00000004  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    main_loop        0x00000004  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    data_loop        0x00000080  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    data_done        0x0000009C  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    send_nak         0x000000C8  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    do_jump          0x000000D4  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    getc             0x000000D8  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    putc             0x000000F0  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    crc16_byte       0x00000104  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    crc_loop         0x0000011C  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+    crc_skip         0x00000138  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\loader/loader.o.json
+
+  Entry: _start @ 0x00000000
+
+  text_image: 328 bytes @ 0x00000000
+  data_image: 0 bytes @ 0x00001000
+  ========================================================================

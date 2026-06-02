@@ -1,0 +1,98 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "loader.s",
+  "sections": {
+    ".text": {
+      "size": 328,
+      "data": "37 04 00 20 EF 00 40 0D 93 02 A0 0A E3 1C 55 FE EF 00 80 0C 93 02 50 05 E3 16 55 FE B7 04 01 00 93 84 F4 FF EF 00 40 0B 13 09 05 00 EF 00 80 0D EF 00 80 0A 93 09 05 00 EF 00 C0 0C EF 00 C0 09 13 0A 05 00 EF 00 00 0C EF 00 00 09 93 12 85 00 33 6A 5A 00 EF 00 00 0B EF 00 00 08 93 12 05 01 33 6A 5A 00 EF 00 00 0A EF 00 00 07 93 12 85 01 33 6A 5A 00 EF 00 00 09 13 0B 00 00 93 0B 0A 00 63 0E 3B 01 EF 00 40 05 23 80 AB 00 EF 00 80 07 93 8B 1B 00 13 0B 1B 00 6F F0 9F FE EF 00 C0 03 93 0A 05 00 EF 00 40 03 93 12 85 00 B3 EA 5A 00 63 9C 54 01 93 02 20 00 63 0E 59 00 13 05 60 00 EF 00 00 03 6F F0 1F F4 13 05 50 01 EF 00 40 02 6F F0 5F F3 67 00 0A 00 03 23 44 00 13 73 13 00 E3 0C 03 FE 03 25 04 00 13 75 F5 0F 67 80 00 00 03 23 44 00 13 73 23 00 E3 1C 03 FE 23 20 A4 00 67 80 00 00 93 12 85 00 B3 C4 54 00 37 03 01 00 13 03 F3 FF B3 F4 64 00 93 03 80 00 37 8E 00 00 B3 F2 C4 01 93 94 14 00 63 88 02 00 37 1E 00 00 13 0E 1E 02 B3 C4 C4 01 B3 F4 64 00 93 83 F3 FF E3 9E 03 FC 67 80 00 00"
+    }
+  },
+  "symbols": [
+    {
+      "name": "_start",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    },
+    {
+      "name": "main_loop",
+      "section": ".text",
+      "offset": 4,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "find_aa",
+      "section": ".text",
+      "offset": 4,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "data_loop",
+      "section": ".text",
+      "offset": 128,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "data_done",
+      "section": ".text",
+      "offset": 156,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "send_nak",
+      "section": ".text",
+      "offset": 200,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "do_jump",
+      "section": ".text",
+      "offset": 212,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "getc",
+      "section": ".text",
+      "offset": 216,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "putc",
+      "section": ".text",
+      "offset": 240,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "crc16_byte",
+      "section": ".text",
+      "offset": 260,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "crc_loop",
+      "section": ".text",
+      "offset": 284,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "crc_skip",
+      "section": ".text",
+      "offset": 312,
+      "binding": "LOCAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}

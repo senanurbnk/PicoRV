@@ -1,0 +1,18 @@
+
+  ========================================================================
+  LINK MAP
+  ========================================================================
+  Script: LinkerScript(text=0x00003000+2048, data=0x00003800+2048, entry='_start')
+
+  Section Bases:
+    .text    0x00003000 - 0x00003018  (  24B)  C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\apps/t1_arith_led.o.json
+
+  Symbols (defined):
+    _start           0x00003000  GLOBAL  .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\apps/t1_arith_led.o.json
+    spin             0x00003014  LOCAL   .text     C:\Users\fatih\OneDrive\Masaüstü\PicoRV\assembler_1\assembler_1\.claude\worktrees\epic-hamilton-94e4da\assembler_1\assembler_1\apps/t1_arith_led.o.json
+
+  Entry: _start @ 0x00003000
+
+  text_image: 24 bytes @ 0x00003000
+  data_image: 0 bytes @ 0x00003800
+  ========================================================================

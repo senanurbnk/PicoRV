@@ -1,0 +1,28 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "t1_arith_led.s",
+  "sections": {
+    ".text": {
+      "size": 24,
+      "data": "B7 02 00 10 13 03 80 02 93 03 20 00 33 0E 73 00 23 A0 C2 01 6F 00 00 00"
+    }
+  },
+  "symbols": [
+    {
+      "name": "_start",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    },
+    {
+      "name": "spin",
+      "section": ".text",
+      "offset": 20,
+      "binding": "LOCAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}
