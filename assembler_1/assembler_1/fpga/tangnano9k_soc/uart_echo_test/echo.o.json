@@ -1,0 +1,35 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "echo.s",
+  "sections": {
+    ".text": {
+      "size": 44,
+      "data": "B7 02 00 20 03 A3 42 00 13 73 13 00 E3 0C 03 FE 83 A3 02 00 93 F3 F3 0F 03 AE 42 00 13 7E 2E 00 E3 1C 0E FE 23 A0 72 00 6F F0 DF FD"
+    }
+  },
+  "symbols": [
+    {
+      "name": "_start",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    },
+    {
+      "name": "poll",
+      "section": ".text",
+      "offset": 4,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "tx_wait",
+      "section": ".text",
+      "offset": 24,
+      "binding": "LOCAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}

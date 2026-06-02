@@ -24,8 +24,8 @@
 // =============================================================
 
 module bram #(
-    parameter ADDR_BITS = 11,                  // 2K word = 8 KB
-    parameter [255:0] INIT_FILE = "blink.hex"
+    parameter ADDR_BITS = 12,                  // 4K word = 16 KB (loader@0x0000 + app@0x3000)
+    parameter [255:0] INIT_FILE = "mem.hex"
 ) (
     input  wire                  clk,
     input  wire [3:0]            wstrb,        // byte-enable
@@ -42,8 +42,10 @@ module bram #(
         // dosyayi project source olarak ekleme aliskanligi nedeniyle)
         // BRAM_INIT_LOAD tanimli olmaz, icerik atlanir; sadece bu
         // include yolu ile aktif olur.
+        // Nötr ad: build script aktif firmware'in _init.vh'sini buraya kopyalar
+        // (Faz 1: echo_init.vh -> mem_init.vh ; Faz 3: loader_init.vh -> mem_init.vh)
         `define BRAM_INIT_LOAD
-        `include "blink_init.vh"
+        `include "mem_init.vh"
         `undef BRAM_INIT_LOAD
 
         // Yedek: bazi simulator'lar veya farkli synth tool'lari

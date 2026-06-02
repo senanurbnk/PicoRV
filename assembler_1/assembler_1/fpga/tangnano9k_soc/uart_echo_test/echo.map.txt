@@ -1,0 +1,19 @@
+
+  ========================================================================
+  LINK MAP
+  ========================================================================
+  Script: LinkerScript(text=0x00000000+4096, data=0x00001000+4096, entry='_start')
+
+  Section Bases:
+    .text    0x00000000 - 0x0000002C  (  44B)  fpga/tangnano9k_soc/uart_echo_test/echo.o.json
+
+  Symbols (defined):
+    _start           0x00000000  GLOBAL  .text     fpga/tangnano9k_soc/uart_echo_test/echo.o.json
+    poll             0x00000004  LOCAL   .text     fpga/tangnano9k_soc/uart_echo_test/echo.o.json
+    tx_wait          0x00000018  LOCAL   .text     fpga/tangnano9k_soc/uart_echo_test/echo.o.json
+
+  Entry: _start @ 0x00000000
+
+  text_image: 44 bytes @ 0x00000000
+  data_image: 0 bytes @ 0x00001000
+  ========================================================================

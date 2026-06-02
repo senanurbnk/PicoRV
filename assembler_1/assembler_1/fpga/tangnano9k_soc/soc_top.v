@@ -2,14 +2,16 @@
 // soc_top.v — Tang Nano 9K + PicoRV32 minimal SoC
 // =============================================================
 //
-// Bellek haritasi:
-//   0x00000000 - 0x00001FFF   .text    (BRAM 8 KB, $readmemh init)
-//   0x10000000                 GPIO     (alt 6 bit -> LED'ler)
+// Bellek haritasi (Proje 3 — loader + uygulama):
+//   0x00000000 - 0x00003FFF   BRAM 16 KB  (loader@0x0000, uygulama@0x3000)
+//   0x10000000                 GPIO        (alt 6 bit -> LED'ler)
+//   0x20000000                 UART        (+0x00 DATA, +0x04 STATUS)
 //
 // Bus: PicoRV32'nin native MEM_VALID/MEM_READY interface'i.
 // Adres decode: mem_addr[31:28]
 //   4'h0  -> BRAM
 //   4'h1  -> GPIO
+//   4'h2  -> UART
 //   diger -> ready=1, rdata=0 (no-op; CPU takilmasin)
 //
 // Reset: btn_reset_n active-low (Tang Nano 9K BTN1).
@@ -21,8 +23,12 @@
 module soc_top (
     input  wire        clk_27mhz,
     input  wire        btn_reset_n,    // active-low
-    output wire [5:0]  led_n           // active-low LEDs (Tang Nano 9K)
+    output wire [5:0]  led_n,          // active-low LEDs (Tang Nano 9K)
+    input  wire        uart_rx,        // FPGA pin 18 (PC TX -> FPGA)
+    output wire        uart_tx         // FPGA pin 17 (FPGA -> PC RX)
 );
+    // Bring-up'ta 9600 (güvenli); calisinca 115200'e cikilabilir.
+    localparam integer UART_BAUD = 9600;
     // -------------------------------------------------------------
     // Reset synchronizer + power-on counter
     // -------------------------------------------------------------
@@ -56,20 +62,24 @@ module soc_top (
     // -------------------------------------------------------------
     wire bram_sel = (mem_addr[31:28] == 4'h0);
     wire gpio_sel = (mem_addr[31:28] == 4'h1);
-    wire other_sel = ~(bram_sel | gpio_sel);
+    wire uart_sel = (mem_addr[31:28] == 4'h2);
+    wire other_sel = ~(bram_sel | gpio_sel | uart_sel);
+
+    // Tek-cycle erisim strobe'u (transaction'in tamamlandigi cycle).
+    wire bus_access = mem_valid && mem_ready;
 
     // -------------------------------------------------------------
-    // BRAM (8 KB, sync)
+    // BRAM (16 KB, sync) — loader@0x0000 + uygulama@0x3000
     // -------------------------------------------------------------
     wire [31:0] bram_rdata;
     bram #(
-        .ADDR_BITS(11),
-        .INIT_FILE("blink.hex")
+        .ADDR_BITS(12),
+        .INIT_FILE("mem.hex")
     ) u_bram (
         .clk(clk_27mhz),
         .wstrb(bram_sel ? mem_wstrb : 4'b0),
-        .waddr(mem_addr[12:2]),
-        .raddr(mem_addr[12:2]),
+        .waddr(mem_addr[13:2]),
+        .raddr(mem_addr[13:2]),
         .wdata(mem_wdata),
         .rdata(bram_rdata)
     );
@@ -93,6 +103,29 @@ module soc_top (
     assign led_n = ~led_value;
 
     // -------------------------------------------------------------
+    // UART (0x2000_0000) — bring-up echo + Proje 3 loader kanali
+    // -------------------------------------------------------------
+    // Tek-cycle yaz/oku strobe'lari (mem_valid && mem_ready). Yazilim
+    // STATUS.tx_busy / STATUS.rx_valid yoklar; bus stall yok.
+    wire        uart_wr = uart_sel && bus_access &&  (|mem_wstrb);
+    wire        uart_rd = uart_sel && bus_access && ~(|mem_wstrb);
+    wire [31:0] uart_rdata;
+    uart #(
+        .CLK_FREQ(27_000_000),
+        .BAUD(UART_BAUD)
+    ) u_uart (
+        .clk(clk_27mhz),
+        .resetn(resetn),
+        .wr_en(uart_wr),
+        .rd_en(uart_rd),
+        .reg_addr(mem_addr[3:2]),
+        .wdata(mem_wdata),
+        .rdata(uart_rdata),
+        .rx(uart_rx),
+        .tx(uart_tx)
+    );
+
+    // -------------------------------------------------------------
     // Read mux + 1-cycle ready strobe
     // -------------------------------------------------------------
     // BRAM senkron oldugu icin ready'yi 1 cycle gecikmeli ureti riz.
@@ -108,6 +141,7 @@ module soc_top (
 
     assign mem_rdata = bram_sel ? bram_rdata
                      : gpio_sel ? gpio_rdata
+                     : uart_sel ? uart_rdata
                      : 32'h0000_0000;
 
     // -------------------------------------------------------------

@@ -89,6 +89,31 @@ def do_ping(ser, timeout):
     return False
 
 
+def do_echo_test(ser, timeout):
+    """Faz 1 bring-up: FPGA'deki echo firmware'i ile raw bayt echo dogrula.
+    (Henuz loader/paket yok; sadece UART donanimi sinanir.)"""
+    payload = bytes(range(256))   # 0x00..0xFF — tum bayt desenleri
+    ser.reset_input_buffer()
+    ser.write(payload)
+    got = bytearray()
+    deadline = time.time() + max(timeout, len(payload) * 0.02 + 1.0)
+    while len(got) < len(payload) and time.time() < deadline:
+        chunk = ser.read(len(payload) - len(got))
+        if chunk:
+            got.extend(chunk)
+    if bytes(got) == payload:
+        print(f"ECHO TEST OK: {len(payload)} bayt (0x00..0xFF) birebir geri geldi")
+        return True
+    print(f"ECHO TEST FAIL: gonderilen {len(payload)}B, gelen {len(got)}B", file=sys.stderr)
+    # ilk farki bildir
+    for i in range(min(len(got), len(payload))):
+        if got[i] != payload[i]:
+            print(f"  ilk fark index {i}: gonderilen 0x{payload[i]:02X}, gelen 0x{got[i]:02X}",
+                  file=sys.stderr)
+            break
+    return False
+
+
 def main():
     ap = argparse.ArgumentParser(description="PicoRV32 UART loader (host)")
     ap.add_argument("--port", help="Seri port (COM5, /dev/ttyUSB0)")
@@ -99,7 +124,9 @@ def main():
     ap.add_argument("--block-size", type=int, default=64, help="Blok boyu (4'un kati)")
     ap.add_argument("--retries", type=int, default=5)
     ap.add_argument("--timeout", type=float, default=2.0, help="Yanit timeout (s)")
-    ap.add_argument("--ping", action="store_true", help="Sadece PING gonder")
+    ap.add_argument("--ping", action="store_true", help="Sadece PING gonder (loader gerekir)")
+    ap.add_argument("--echo-test", action="store_true",
+                    help="Faz 1: echo firmware ile raw bayt echo dogrula")
     ap.add_argument("--selftest", action="store_true", help="FPGA'siz crc+packet self-test")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
@@ -116,6 +143,8 @@ def main():
 
     ser = _open_serial(args.port, args.baud, args.timeout)
     try:
+        if args.echo_test:
+            return 0 if do_echo_test(ser, args.timeout) else 1
         if args.ping:
             return 0 if do_ping(ser, args.timeout) else 1
         if not args.bin:

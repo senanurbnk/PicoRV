@@ -24,7 +24,7 @@ assembler_1/assembler_1/
 │   parser.py, encoder.py, bit_layout.py, assembler.py, object_format.py,
 │   linker.py, linker_script.py, hex_emitter.py, run_link.py
 ├─ fpga/tangnano9k_soc/   soc_top.v, bram.v, gpio.v, tangnano9k.cst/.sdc  (mevcut)
-│                         + simpleuart.v        ← YENİ
+│                         + uart.v        ← YENİ
 │                         + loader_init.vh      ← YENİ (üretilir)
 ├─ firmware/blink/         (mevcut referans demo)
 ├─ vendor/picorv32/        picorv32.v (ISC)     (mevcut)
@@ -120,7 +120,7 @@ Blok boyu 4'ün katı (word hizalı) → loader SW ile yazar, basitleşir.
 - ✅ Kriter: yeni komutlar doğru encode; mevcut testler yeşil; blink hâlâ derleniyor.
 
 **Faz 1 — UART loopback (donanım) (½–1 gün)**
-- `fpga/tangnano9k_soc/simpleuart.v` ekle (picosoc kaynaklı, ISC). soc_top.v'ye UART instance + `0x2` decode + top-level `uart_rx/uart_tx` portları. .cst'ye **doğrulanmış** UART pinleri.
+- `fpga/tangnano9k_soc/uart.v` ekle (picosoc kaynaklı, ISC). soc_top.v'ye UART instance + `0x2` decode + top-level `uart_rx/uart_tx` portları. .cst'ye **doğrulanmış** UART pinleri.
 - Geçici echo firmware'i (BRAM'e gömülü) ile baytı geri yolla.
 - ✅ Kriter: `host_loader.py --ping` → echo geri geliyor; baud doğru (önce **9600**).
 
