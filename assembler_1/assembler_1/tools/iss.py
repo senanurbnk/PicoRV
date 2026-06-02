@@ -57,7 +57,9 @@ class ISS:
         self.reg = [0] * 32
         self.pc = 0
         self.uart = uart or UartModel()
-        self.gpio = 0
+        self.gpio = 0            # GPIO+0: LED cikis degeri (soft 1=ON)
+        self.button = 0          # GPIO+4: buton girisi (1=basili)
+        self.gpio_writes = []    # LED'e yazilan deger gecmisi (test/blink dogrulamasi)
         self.max_steps = max_steps
         self.halted = False
         self.halt_reason = None
@@ -68,7 +70,11 @@ class ISS:
         if (addr & 0xF0000000) == UART_BASE:
             v = self.uart.read(addr & 0xF)
         elif (addr & 0xF0000000) == GPIO_BASE:
-            v = self.gpio
+            off = addr & 0xF
+            if off == 0x4:
+                v = 1 if self.button else 0     # GPIO+4: buton
+            else:
+                v = self.gpio                   # GPIO+0: son yazilan LED degeri
         elif addr < BRAM_SIZE:
             v = 0
             for i in range(size):
@@ -85,7 +91,9 @@ class ISS:
         if (addr & 0xF0000000) == UART_BASE:
             self.uart.write(addr & 0xF, val)
         elif (addr & 0xF0000000) == GPIO_BASE:
-            self.gpio = val
+            if (addr & 0xF) == 0:               # GPIO+0: LED yaz
+                self.gpio = val & 0x3F
+                self.gpio_writes.append(self.gpio)
         elif addr < BRAM_SIZE:
             for i in range(size):
                 self.mem[addr + i] = (val >> (8 * i)) & 0xFF

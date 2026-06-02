@@ -1,0 +1,35 @@
+{
+  "magic": "PICORV-OBJ",
+  "version": 1,
+  "source": "t2_loop_blink.s",
+  "sections": {
+    ".text": {
+      "size": 36,
+      "data": "B7 02 00 10 13 03 00 00 93 73 F3 03 23 A0 72 00 13 03 13 00 37 8E 00 00 13 0E FE FF E3 1E 0E FE 6F F0 9F FE"
+    }
+  },
+  "symbols": [
+    {
+      "name": "_start",
+      "section": ".text",
+      "offset": 0,
+      "binding": "GLOBAL",
+      "defined": true
+    },
+    {
+      "name": "loop",
+      "section": ".text",
+      "offset": 8,
+      "binding": "LOCAL",
+      "defined": true
+    },
+    {
+      "name": "delay",
+      "section": ".text",
+      "offset": 24,
+      "binding": "LOCAL",
+      "defined": true
+    }
+  ],
+  "relocations": []
+}

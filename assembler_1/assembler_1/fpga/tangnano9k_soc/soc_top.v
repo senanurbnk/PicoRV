@@ -22,10 +22,11 @@
 
 module soc_top (
     input  wire        clk_27mhz,
-    input  wire        btn_reset_n,    // active-low
+    input  wire        btn_reset_n,    // active-low (S2, pin 4)
     output wire [5:0]  led_n,          // active-low LEDs (Tang Nano 9K)
     input  wire        uart_rx,        // FPGA pin 18 (PC TX -> FPGA)
-    output wire        uart_tx         // FPGA pin 17 (FPGA -> PC RX)
+    output wire        uart_tx,        // FPGA pin 17 (FPGA -> PC RX)
+    input  wire        btn_user_n      // active-low user button (S1, pin 3) — T3 girisi
 );
     // Bring-up'ta 9600 (güvenli); calisinca 115200'e cikilabilir.
     localparam integer UART_BAUD = 9600;
@@ -85,15 +86,25 @@ module soc_top (
     );
 
     // -------------------------------------------------------------
-    // GPIO (LED MMIO)
+    // GPIO (LED cikis + buton giris MMIO)
     // -------------------------------------------------------------
+    // Buton active-low -> 2-FF senkronizer -> tersle ("1=basili").
+    reg btn_s0, btn_s1;
+    always @(posedge clk_27mhz) begin
+        btn_s0 <= btn_user_n;
+        btn_s1 <= btn_s0;
+    end
+    wire btn_pressed = ~btn_s1;
+
     wire [31:0] gpio_rdata;
     wire [5:0]  led_value;
-    gpio #(.LED_COUNT(6)) u_gpio (
+    gpio #(.LED_COUNT(6), .BTN_COUNT(1)) u_gpio (
         .clk(clk_27mhz),
         .sel(gpio_sel),
         .wstrb(mem_wstrb),
+        .reg_addr(mem_addr[3:2]),
         .wdata(mem_wdata),
+        .btn_in(btn_pressed),
         .led_value(led_value),
         .rdata(gpio_rdata)
     );
