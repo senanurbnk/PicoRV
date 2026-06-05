@@ -3,8 +3,9 @@ const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, LevelFormat, HeadingLevel, BorderStyle, WidthType,
-  ShadingType, PageNumber, Header, Footer, PageBreak, TableOfContents,
+  ShadingType, PageNumber, Header, Footer, PageBreak, TableOfContents, ImageRun,
 } = require("docx");
+const path = require("path");
 
 const FONT = "Courier New";
 const SZ = 20;        // 10pt (half-points)
@@ -45,6 +46,15 @@ function MONO(block, o = {}) {
     new Paragraph({ children: [R(ln.length ? ln : " ", { size: o.size || SZ_SMALL })],
       spacing: { after: 0, line: 230 },
       shading: { type: ShadingType.CLEAR, fill: "F2F2F2" } }));
+}
+function IMG(file, w, h, caption) {
+  const data = fs.readFileSync(path.join(__dirname, "img", file));
+  const out = [ new Paragraph({ alignment: AlignmentType.CENTER,
+    spacing: { before: 80, after: 40 },
+    children: [ new ImageRun({ type: "png", data, transformation: { width: w, height: h },
+      altText: { title: caption || file, description: caption || file, name: file } }) ] }) ];
+  if (caption) out.push(CAP(caption));
+  return out;
 }
 function CAP(text) { // sekil/tablo basligi
   return P([R(text, { italics: true, size: SZ_SMALL, color: "595959" })],
@@ -184,19 +194,7 @@ body.push(H1("2. SİSTEM MİMARİSİ VE DONANIM-YAZILIM ORTAK TASARIMI (CO-DESIG
 body.push(P("Sistem, bilgisayar tarafında çalışan bir yazılım zinciri ile FPGA tarafında " +
   "çalışan bir SoC'tan (System-on-Chip) oluşur. Genel mimari ve veri akışı Şekil 2.1'de " +
   "verilmiştir."));
-body.push(...MONO(
-`   PC (host)                              Tang Nano 9K (GW1NR-9)
- +-------------+                        +-----------------------------+
- | uygulama.s  |                        |   PicoRV32  <->  Bus/Decoder|
- |   |assembler|                        |      ^             |        |
- |   v         |                        |      |       +-----+-----+  |
- | uygulama.bin|                        |  16KB BRAM   GPIO    UART   |
- |   |         |   USB-UART (BL702)     |  +loader@0x0 (LED+  (0x2000_|
- | host_loader +======seri port=======>|  +app  @0x3000 buton) 0000) |
- | (paket+CRC) |   AA55|CMD|LEN|ADDR|   |      ^                ^     |
- |             |<-----ACK / NAK---------|  loader (RV32I) <------+    |
- +-------------+   DATA|CRC16           +-----------------------------+`));
-body.push(CAP("Şekil 2.1. Uçtan uca sistem mimarisi ve veri akışı."));
+body.push(...IMG("fig_arch.png", 624, 309, "Şekil 2.1. Uçtan uca sistem mimarisi ve veri akışı."));
 
 body.push(H2("2.1. Toolchain Arayüz Standartları"));
 body.push(P("Araç zinciri modülleri arasındaki veri alışverişi, açıkça tanımlanmış dosya ve " +
@@ -209,14 +207,7 @@ body.push(P("Araç zinciri modülleri arasındaki veri alışverişi, açıkça 
   "$readmemh (.hex) ve Verilog include başlığı (_init.vh)."));
 body.push(P("Host ile loader arasındaki haberleşme, Tablo 2.1'deki paket çerçevesiyle " +
   "yapılır. CRC, SYNC hariç CMD..DATA alanları üzerinden hesaplanır."));
-body.push(...MONO(
-`  +-------+-----+-----+-----------+-----------+--------+
-  | SYNC  | CMD | LEN |   ADDR    |   DATA    | CRC16  |
-  | AA 55 | 1B  | 1B  |  4B (LE)  |  LEN bayt |  2B LE |
-  +-------+-----+-----+-----------+-----------+--------+
-  CMD: 0x01=WRITE_BLOCK  0x02=START(jump)  0x03=PING
-  Yanit: 0x06=ACK  0x15=NAK`));
-body.push(CAP("Tablo 2.1 / Şekil 2.2. Host–loader paket çerçevesi."));
+body.push(...IMG("fig_packet.png", 624, 139, "Şekil 2.2. Host–loader paket çerçevesi (CMD: 0x01=WRITE_BLOCK, 0x02=START, 0x03=PING; yanıt 0x06=ACK / 0x15=NAK)."));
 
 body.push(H2("2.2. FPGA Loader ve PicoRV32 Bellek Haritası"));
 body.push(P("SoC'un adres çözücüsü, 32-bit adresin üst yarım baytına (mem_addr[31:28]) göre " +
@@ -235,24 +226,7 @@ body.push(P("Loader'ın iç işleyişi bir sonlu durum makinesidir (FSM); UART't
   "uygulama henüz başlatılmamıştır (\"bekleme\" durumu), yükleme bitince START komutuyla " +
   "uygulamanın giriş adresine JALR ile atlanır (bu, işlemcinin reset hattını serbest " +
   "bırakmanın yazılımsal karşılığıdır). FSM Şekil 2.3'te verilmiştir."));
-body.push(...MONO(
-`        +-------+   AA 55      +--------+  CMD,LEN,ADDR(4)
-        | IDLE  +------------->| HEADER +-----------------+
-        +---^---+  (SYNC)      +--------+                 |
-            |                                             v
-            |          +------+   LEN bayt -> RAM    +--------+
-   ACK/NAK  |          | DATA |<---------------------+ (oku)  |
-            |          +---+--+   (her bayt CRC'ye)  +--------+
-            |              |
-        +---+----+   CRC16 v   +-----+  eslesme?  +-----------+
-        | ACK/NAK|<------------+ CRC +----------->| START?    |
-        +--------+   karsilastir+-----+   evet     +-----+-----+
-                                                        | START
-                                                        v
-                                                  +-----------+
-                                                  | JUMP 0x3000|
-                                                  +-----------+`));
-body.push(CAP("Şekil 2.3. Loader sonlu durum makinesi (FSM)."));
+body.push(...IMG("fig_fsm.png", 600, 336, "Şekil 2.3. Loader sonlu durum makinesi (FSM)."));
 body.push(P("Loader, RV32I komutlarıyla yazılmış 82 komutluk (328 bayt) tek dosyalık bir " +
   "programdır. getc/putc/crc16_byte alt programları yaprak (leaf) niteliktedir; başka alt " +
   "program çağırmadıkları için tek seviye dönüş adresi (ra) yeterlidir ve yığın (stack) " +
@@ -445,6 +419,9 @@ body.push(TABLE([3360, 2000, 2000, 2000], [
   ["Rapor + sunum", PH_cell(), PH_cell(), PH_cell()],
 ]));
 body.push(CAP("Tablo 5.1. RACI sorumluluk matrisi (takımca doldurulacak)."));
+body.push(P("Projenin fazlı zaman çizelgesi Şekil 5.1'de verilmiştir; donanım fazları " +
+  "(UART/SoC ve loader) öne alınarak entegrasyon riski erken yönetilmiştir (PÇ13)."));
+body.push(...IMG("fig_gantt.png", 600, 257, "Şekil 5.1. Proje 3 fazlı zaman çizelgesi (Gantt)."));
 body.push(H2("5.2. Koordinasyon ve Sürüm Kontrol Yönetimi"));
 body.push(P("Proje, git sürüm kontrol sistemi ile yönetilmiştir. Geliştirme bir özellik " +
   "(feature) dalında yapılıp her doğrulanmış aşama sonunda ana dala (main) aktarılmıştır; " +
