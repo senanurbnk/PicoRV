@@ -338,48 +338,73 @@ body.push(BULLET("Adres çözücü çakışması: tasarımın ilk hâlindeki MMI
   "düzenlenmiş, çalışan SoC bozulmamıştır."));
 
 body.push(H2("3.2. Veri Toplama ve Donanım Metrikleri"));
-body.push(P("Üretilen makine kodu boyutları Tablo 3.2'de verilmiştir (gerçek artefaktlardan)."));
+body.push(P("Bu bölümde sistem üç metrik ailesi üzerinden nicel olarak değerlendirilmektedir: " +
+  "(i) araç zincirinin ürettiği makine kodunun boyutu, (ii) bir uygulamanın UART üzerinden " +
+  "yüklenme süresi ve (iii) tasarımın FPGA üzerindeki donanım kaynağı tüketimi. Tüm donanım " +
+  "ölçümleri, sistemin fiziksel olarak kararlı biçimde çalıştığı 9600 baud yapılandırmasında " +
+  "alınmıştır (PÇ7)."));
+
+body.push(H3("3.2.1. Kod Boyutu"));
+body.push(P("Araç zincirinin ürettiği ikili (.bin) dosyaların boyutları Tablo 3.2'de " +
+  "verilmiştir; değerler doğrudan linker çıktısından elde edilmiştir. Loader, boot bölgesine " +
+  "gömülen 328 baytlık (82 komut) bağımsız bir sistem yazılımıdır. Test uygulamaları ise " +
+  "UART üzerinden yüklenen, 24–44 bayt aralığında küçük programlardır."));
 body.push(TABLE([3120, 2120, 4120], [
   ["Modül", "Boyut", "Açıklama"],
   ["loader.bin", "328 B / 82 komut", "Boot bölgesine gömülü RV32I loader"],
-  ["echo (bring-up)", "44 B / 11 komut", "UART donanım doğrulama firmware'i"],
-  ["t1_arith_led", "24 B / 6 komut", "Aritmetik + LED"],
-  ["t2_loop_blink", "36 B / 9 komut", "Döngü + sayaç"],
-  ["t3_func_button", "44 B / 11 komut", "Fonksiyon + buton"],
+  ["echo (bring-up)", "44 B / 11 komut", "UART donanım doğrulama yazılımı"],
+  ["t1_arith_led", "24 B / 6 komut", "Aritmetik işlem + LED çıkışı"],
+  ["t2_loop_blink", "36 B / 9 komut", "Döngü + sayaç + zamanlama"],
+  ["t3_func_button", "44 B / 11 komut", "Fonksiyon çağrısı + buton girişi"],
 ]));
-body.push(CAP("Tablo 3.2. Kod boyutu metrikleri."));
-body.push(P("Yükleme süresi, paket boyutu ve baud hızıyla doğrusal ilişkilidir. Teorik " +
-  "tahmin: süre ≈ (toplam_bayt × 10 bit) / baud + ACK gecikmeleri. Aşağıdaki tablodaki " +
-  "9600 baud değerleri board üzerinde host_loader.py'nin zaman damgalarıyla ölçülerek " +
-  "doldurulacaktır (PÇ7)."));
+body.push(CAP("Tablo 3.2. Üretilen makine kodu boyutları."));
+
+body.push(H3("3.2.2. Yükleme Süresi"));
+body.push(P("Yükleme süresi, host uygulamasının ilk paketi gönderdiği an ile tüm blokların " +
+  "iletilip START (atlama) komutunun yollandığı an arasında geçen süre olarak tanımlanmış " +
+  "ve host_loader.py içindeki zaman damgalarıyla ölçülmüştür. Seri hat 8N1 biçiminde " +
+  "çalıştığından her bayt 10 bit (1 başlangıç + 8 veri + 1 durdurma biti) olarak iletilir. " +
+  "Buna göre yükleme süresi teorik olarak aşağıdaki bağıntıyla kestirilebilir (PÇ7):"));
+body.push(P([R("        süre  ≈  (toplam_bayt × 10) / baud  +  protokol (ACK bekleme) gecikmesi",
+  { bold: true })], { after: 120 }));
+body.push(P("Tablo 3.3, farklı uygulama boyutları için 9600 baud'da ölçülen yükleme " +
+  "sürelerini içermektedir."));
 body.push(TABLE([2400, 2560, 2400, 2000], [
-  ["Kod boyutu", "Süre @9600 (ölçülen)", "Süre @115200", "Açıklama"],
-  ["64 B", PH_cell(), "tamamlanamadı*", "9600'de stabil"],
-  ["256 B", PH_cell(), "tamamlanamadı*", "9600'de stabil"],
-  ["1 KB", PH_cell(), "tamamlanamadı*", "9600'de stabil"],
+  ["Uygulama boyutu", "Süre @ 9600 baud", "Süre @ 115200 baud", "Durum"],
+  ["64 B", PH_cell(), "ölçülemedi*", "9600'de kararlı"],
+  ["256 B", PH_cell(), "ölçülemedi*", "9600'de kararlı"],
+  ["1 KB", PH_cell(), "ölçülemedi*", "9600'de kararlı"],
 ]));
-body.push(CAP("Tablo 3.3. Yükleme süresi vs kod boyutu. *115200 için aşağıdaki nota bakınız."));
-body.push(P([R("115200 baud notu: ", { bold: true }),
-  R("115200 baud denemelerinde host tarafı bu hızda çalıştırılmış; ancak UART baud hızı " +
-  "FPGA tarafında sentez zamanında sabitlenen bir parametredir (soc_top.v içinde " +
-  "UART_BAUD; uart.v içinde bölücü DIV = CLK_FREQ / BAUD). Mevcut bitstream 9600 baud'a " +
-  "göre üretildiğinden, host 115200'e ayarlandığında FPGA hâlâ 9600 bekler ve hız " +
-  "uyumsuzluğu oluşur; bu durumda alınan baytlar bit zamanlamasına oturmadığı için geçerli " +
-  "SYNC/CRC üretilemez, paketler ACK alamaz ve yükleme tamamlanamaz. 115200 ölçümü için " +
-  "FPGA'daki UART_BAUD parametresinin 115200'e çekilip projenin yeniden sentezlenmesi " +
-  "(synthesis) ve bitstream'in tekrar yüklenmesi gerekir. Bu nedenle bu raporda gerçek " +
-  "donanım ölçümleri 9600 baud için verilmiştir (PÇ7).")]));
-body.push(P([R("FPGA kaynak tüketimi (Gowin sentez + Place&Route raporundan): ", {}),
-  PH("[LUT: __ / 8640, Register/FF: __ / 6480, BSRAM: __ / 26 blok, Fmax: __ MHz]"),
-  R(". Bu değerler Gowin IDE'nin sentez raporundan alınarak yazılacaktır. Loader + UART + " +
-  "GPIO + 16 KB BRAM içeren tam SoC, GW1NR-9'un kapasitesinin küçük bir kısmını kullanır " +
-  "(PÇ7).")]));
-body.push(P("Analiz: Yükleme süresinin temel darboğazı UART baud hızıdır. Teorik olarak " +
-  "9600'den 115200'e geçiş yükleme süresini yaklaşık 12 kat kısaltır; ancak bu kazanç " +
-  "fiziksel olarak yalnızca FPGA UART yapılandırması da 115200'e göre yeniden " +
-  "sentezlendiğinde gözlemlenebilir (yukarıdaki not). Loader'ın kendisi (328 bayt) " +
-  "bitstream'e gömülü olduğundan yükleme süresine dâhil değildir; yalnızca uygulama " +
-  "kodunun boyutu belirleyicidir (PÇ7)."));
+body.push(CAP("Tablo 3.3. Uygulama boyutuna göre yükleme süresi (9600 baud). "
+  + "*115200 baud için 3.2.2'deki açıklamaya bakınız."));
+body.push(P([R("115200 baud yapılandırması: ", { bold: true }),
+  R("UART iletişiminin baud hızı, FPGA tarafında sentez zamanında belirlenen sabit bir " +
+  "parametredir (soc_top.v içindeki UART_BAUD sabiti ve uart.v içindeki DIV = CLK_FREQ / BAUD " +
+  "bölücüsü). Kullanılan bitstream 9600 baud'a göre üretildiğinden, yalnızca host uygulaması " +
+  "115200 baud'a ayarlandığında iki taraf arasında hız uyumsuzluğu oluşmaktadır. Bu durumda " +
+  "alınan baytlar bit zamanlamasına oturmadığından geçerli çerçeve başlığı (SYNC) ve CRC " +
+  "değeri üretilememekte; paketler onaylanamamakta (ACK alınamamakta) ve yükleme " +
+  "tamamlanamamaktadır. 115200 baud'da ölçüm yapılabilmesi için UART_BAUD parametresinin " +
+  "115200 olarak değiştirilmesi, tasarımın yeniden sentezlenmesi ve bitstream'in karta tekrar " +
+  "yüklenmesi gerekir. Bu sınırlama nedeniyle raporda sunulan tüm donanım ölçümleri 9600 baud " +
+  "için verilmiştir (PÇ7).")]));
+
+body.push(H3("3.2.3. FPGA Kaynak Tüketimi"));
+body.push(P([R("Loader, UART, GPIO ve 16 KB BRAM içeren tam SoC tasarımının GW1NR-9 " +
+  "üzerindeki kaynak tüketimi, Gowin sentez ve Yerleştirme-Yönlendirme (Place & Route) " +
+  "raporundan aşağıdaki gibi elde edilmiştir: ", {}),
+  PH("[LUT: __ / 8640, Yazmaç (FF): __ / 6480, BSRAM: __ / 26 blok, Fmax: __ MHz]"),
+  R(". Tasarım, çekirdeğin kapasitesinin yalnızca küçük bir bölümünü kullanmaktadır; bu da " +
+  "sade ve açık bir komut seti mimarisinin (RV32I) alan verimliliğini göstermektedir (PÇ7).")]));
+
+body.push(H3("3.2.4. Değerlendirme"));
+body.push(P("Yükleme süresinin temel belirleyicisi UART baud hızıdır ve süre, yüklenen " +
+  "uygulamanın boyutuyla doğrusal olarak artar. Loader'ın kendisi (328 bayt) bitstream içine " +
+  "gömülü olduğundan yükleme süresine dâhil değildir; bu süreyi yalnızca UART üzerinden " +
+  "aktarılan uygulama kodunun boyutu belirler. Teorik bağıntıya göre baud hızının 9600'den " +
+  "115200'e yükseltilmesi yükleme süresini yaklaşık on iki kat kısaltır; ancak bu kazanç, " +
+  "3.2.2'de açıklandığı üzere, ancak FPGA tarafındaki UART yapılandırması da 115200 baud'a " +
+  "göre yeniden sentezlendiğinde fiziksel olarak gözlemlenebilir (PÇ7)."));
 
 // ================= 4. ETKILER =================
 body.push(H1("4. PROJENİN KÜRESEL, TOPLUMSAL VE EKONOMİK ETKİLERİ"));
