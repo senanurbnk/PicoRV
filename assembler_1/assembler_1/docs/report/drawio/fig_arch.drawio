@@ -1,0 +1,108 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="arch" name="Sistem Mimarisi">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===================== CONTAINERS ===================== -->
+        <mxCell id="hostC" value="PC (Host) — Toolchain" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;verticalAlign=top;fontStyle=1;fontSize=13;fontFamily=Courier New;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="320" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="fpgaC" value="Tang Nano 9K (GW1NR-9) — soc_top.v" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;verticalAlign=top;fontStyle=1;fontSize=13;fontFamily=Courier New;align=center;" vertex="1" parent="1">
+          <mxGeometry x="700" y="40" width="560" height="660" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== HOST CHAIN ===================== -->
+        <mxCell id="src" value="uygulama.s / .asm&#10;(RV32I kaynak kod)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="80" width="260" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="asm" value="Assembler (two-pass)&#10;parser • opcode_table • encoder&#10;symbol_table • bit_layout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="150" width="260" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="obj" value=".o.json  (PICORV-OBJ)&#10;section + sembol + relocation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="90" y="240" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lnk" value="Linker (two-pass)&#10;linker.py • linker_script&#10;Pass1: layout  Pass2: relocation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="304" width="260" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="emit" value="hex_emitter&#10;.bin / .hex / _init.vh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="90" y="392" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="hl" value="host_loader.py&#10;packet.py + crc.py (CRC-16/CCITT)&#10;blok bölme • ACK/NAK • retry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="456" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="appbin" value="uygulama.bin  (host girdisi)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="90" y="556" width="220" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="src" target="asm"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="asm" target="obj"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="obj" target="lnk"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="lnk" target="emit"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="emit" target="hl"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="hl" target="appbin"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ===================== MIDDLE: SERIAL LINK ===================== -->
+        <mxCell id="usb" value="USB-C seri hat&#10;9600 → 115200 baud&#10;8N1, parity yok" style="shape=cube;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="330" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pkt" value="UART Paketi:  SYNC(AA55) | CMD | LEN | ADDR(4 LE) | DATA | CRC16(2)&#10;CMD: 0x01=WRITE_BLOCK  0x02=START  0x03=PING   |   CRC: SYNC hariç CMD..DATA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=9;align=center;" vertex="1" parent="1">
+          <mxGeometry x="380" y="250" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FPGA SoC ===================== -->
+        <mxCell id="bl702" value="BL702 USB-UART köprüsü&#10;(kart üzeri)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="90" width="220" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="uart" value="uart.v — 8N1 UART&#10;MMIO 0x2000_0000&#10;+0 DATA   +4 STATUS(rx_valid,tx_busy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="160" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="cpu" value="PicoRV32 (RV32I)&#10;PROGADDR_RESET = 0x0000_0000&#10;STACKADDR = 0x0000_2000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="160" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="dec" value="Adres Çözücü (Bus)  —  mem_addr[31:28]&#10;0 → BRAM     1 → GPIO     2 → UART     diğer → 0&#10;native bus: mem_valid / mem_ready / mem_wstrb" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="760" y="270" width="460" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="bram" value="BRAM 16 KB (bram.v, ADDR_BITS=12)&#10;loader   @ 0x0000_0000 – 0x0000_0FFF&#10;uygulama @ 0x0000_3000 – 0x0000_3FFF&#10;init: mem_init.vh (`include)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="372" width="280" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="gpio" value="gpio.v&#10;MMIO 0x1000_0000&#10;+0 LED çıkış   +4 buton giriş" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="372" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="leds" value="6 × LED (active-low)&#10;pin 10,11,13,14,15,16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="482" width="200" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="btn" value="kullanıcı butonu&#10;S1 — pin 3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="544" width="96" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="rst" value="reset&#10;S2 — pin 4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1144" y="544" width="96" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="clk" value="27 MHz osilatör — pin 52" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="488" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- FPGA internal edges -->
+        <mxCell id="f1" value="rx 18 / tx 17" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=block;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="bl702" target="uart"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f2" value="0x2000_0000" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=block;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="uart" target="dec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f3" value="native bus" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=block;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="cpu" target="dec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f4" value="0x0000_0000" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=block;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="dec" target="bram"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f5" value="0x1000_0000" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=block;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="dec" target="gpio"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f6" value="çıkış" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="gpio" target="leds"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f7" value="giriş" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="btn" target="gpio"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f8" value="clk" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;dashed=1;" edge="1" parent="1" source="clk" target="cpu"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f9" value="reset" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;dashed=1;" edge="1" parent="1" source="rst" target="cpu"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Cross link: host <-> FPGA -->
+        <mxCell id="x1" value="veri paketleri  (WRITE/START/PING + CRC16)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#6c8ebf;strokeWidth=2;fontFamily=Courier New;fontSize=10;" edge="1" parent="1" source="hl" target="bl702"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="x2" value="ACK 0x06 / NAK 0x15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;dashed=1;strokeColor=#7f7f7f;fontFamily=Courier New;fontSize=10;" edge="1" parent="1" source="bl702" target="hl"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Title -->
+        <mxCell id="title" value="Şekil 2.1 — Uçtan Uca Sistem Mimarisi ve Veri Akışı (Co-Design)" style="text;html=1;align=center;fontStyle=1;fontSize=14;fontFamily=Courier New;" vertex="1" parent="1">
+          <mxGeometry x="320" y="8" width="700" height="26" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

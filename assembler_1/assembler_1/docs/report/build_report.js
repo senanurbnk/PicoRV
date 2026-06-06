@@ -194,7 +194,7 @@ body.push(H1("2. SİSTEM MİMARİSİ VE DONANIM-YAZILIM ORTAK TASARIMI (CO-DESIG
 body.push(P("Sistem, bilgisayar tarafında çalışan bir yazılım zinciri ile FPGA tarafında " +
   "çalışan bir SoC'tan (System-on-Chip) oluşur. Genel mimari ve veri akışı Şekil 2.1'de " +
   "verilmiştir."));
-body.push(...IMG("fig_arch.png", 624, 309, "Şekil 2.1. Uçtan uca sistem mimarisi ve veri akışı."));
+body.push(...IMG("fig_arch.png", 624, 380, "Şekil 2.1. Uçtan uca sistem mimarisi ve veri akışı (Co-Design)."));
 
 body.push(H2("2.1. Toolchain Arayüz Standartları"));
 body.push(P("Araç zinciri modülleri arasındaki veri alışverişi, açıkça tanımlanmış dosya ve " +
@@ -226,7 +226,7 @@ body.push(P("Loader'ın iç işleyişi bir sonlu durum makinesidir (FSM); UART't
   "uygulama henüz başlatılmamıştır (\"bekleme\" durumu), yükleme bitince START komutuyla " +
   "uygulamanın giriş adresine JALR ile atlanır (bu, işlemcinin reset hattını serbest " +
   "bırakmanın yazılımsal karşılığıdır). FSM Şekil 2.3'te verilmiştir."));
-body.push(...IMG("fig_fsm.png", 600, 336, "Şekil 2.3. Loader sonlu durum makinesi (FSM)."));
+body.push(...IMG("fig_fsm.png", 450, 516, "Şekil 2.3. Loader sonlu durum makinesi (FSM)."));
 body.push(P("Loader, RV32I komutlarıyla yazılmış 82 komutluk (328 bayt) tek dosyalık bir " +
   "programdır. getc/putc/crc16_byte alt programları yaprak (leaf) niteliktedir; başka alt " +
   "program çağırmadıkları için tek seviye dönüş adresi (ra) yeterlidir ve yığın (stack) " +

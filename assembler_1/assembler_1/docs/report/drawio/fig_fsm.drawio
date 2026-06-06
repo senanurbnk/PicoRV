@@ -1,0 +1,91 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="fsm" name="Loader FSM">
+    <mxGraphModel dx="1200" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Şekil 2.3 — Loader Sonlu Durum Makinesi (FSM)" style="text;html=1;align=center;fontStyle=1;fontSize=14;fontFamily=Courier New;" vertex="1" parent="1">
+          <mxGeometry x="200" y="8" width="560" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- main flow -->
+        <mxCell id="start" value="RESET&#10;PC = 0x0000" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="170" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="idle" value="IDLE — getc() ile UART'tan bayt bekle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="315" y="110" width="260" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="daa" value="byte == 0xAA ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="375" y="175" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d55" value="byte == 0x55 ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="375" y="270" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="crcinit" value="crc = 0xFFFF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="315" y="365" width="260" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="header" value="HEADER&#10;CMD = getc();  LEN = getc();  ADDR[0..3] = getc()×4&#10;(her bayt için crc16_byte)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="315" y="420" width="260" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="initi" value="i = 0 ;  ptr = ADDR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="315" y="506" width="260" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="ddata" value="i &lt; LEN ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="375" y="560" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="datastep" value="DATA&#10;b = getc()&#10;SB b → [ptr]&#10;crc16_byte ; i++ ; ptr++" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="650" y="555" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="crcread" value="rx_crc = getc | (getc &lt;&lt; 8)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="315" y="660" width="260" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="dcrc" value="crc == rx_crc ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="365" y="715" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="nak" value="putc NAK (0x15)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="70" y="737" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dstart" value="CMD == START ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="365" y="825" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ack" value="putc ACK (0x06)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="70" y="845" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jump" value="JUMP — JALR x0, 0(s4)  →  0x0000_3000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="315" y="935" width="260" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="end" value="uygulama RAM'den çalışır" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="335" y="1005" width="220" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- leaf note -->
+        <mxCell id="note" value="Leaf altprogramlar (stack yok):&#10;getc  : STATUS.rx_valid bekle, LW DATA&#10;putc  : STATUS.tx_busy bekle, SW DATA&#10;crc16_byte : CRC-16/CCITT-FALSE&#10;             (host crc.py ile birebir)&#10;&#10;Kalıcı reg: s0=UART s1=crc s2=cmd&#10;s3=len s4=addr s5=rx_crc s6=i s7=ptr" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;align=left;fontFamily=Courier New;fontSize=9;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="650" y="690" width="260" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- edges -->
+        <mxCell id="g0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="start" target="idle"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="idle" target="daa"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g2" value="evet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="daa" target="d55"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g2n" value="hayır → IDLE" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;dashed=1;fontFamily=Courier New;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="daa" target="idle"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g3" value="evet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="d55" target="crcinit"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g3n" value="hayır → IDLE" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;dashed=1;fontFamily=Courier New;fontSize=9;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="d55" target="idle"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="crcinit" target="header"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="header" target="initi"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="initi" target="ddata"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g7" value="evet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="ddata" target="datastep"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g8" value="döngü" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;exitX=0.5;exitY=0;entryX=1;entryY=0.5;" edge="1" parent="1" source="datastep" target="ddata"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g9" value="hayır" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="ddata" target="crcread"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="crcread" target="dcrc"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g11" value="hayır" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="dcrc" target="nak"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g12" value="evet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="dcrc" target="dstart"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g13" value="hayır (WRITE/PING)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="dstart" target="ack"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g14" value="evet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="dstart" target="jump"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontFamily=Courier New;fontSize=9;" edge="1" parent="1" source="jump" target="end"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g16" value="sonraki paket → IDLE" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;dashed=1;fontFamily=Courier New;fontSize=9;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="nak" target="idle"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g17" value="sonraki paket → IDLE" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;dashed=1;fontFamily=Courier New;fontSize=9;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="ack" target="idle"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
