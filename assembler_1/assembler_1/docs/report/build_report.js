@@ -349,22 +349,35 @@ body.push(TABLE([3120, 2120, 4120], [
 ]));
 body.push(CAP("Tablo 3.2. Kod boyutu metrikleri."));
 body.push(P("Yükleme süresi, paket boyutu ve baud hızıyla doğrusal ilişkilidir. Teorik " +
-  "tahmin: süre ≈ (toplam_bayt × 10 bit) / baud + ACK gecikmeleri. Aşağıdaki tablo board " +
-  "üzerinde host_loader.py'nin zaman damgalarıyla ölçülerek doldurulacaktır (PÇ7)."));
-body.push(TABLE([2600, 2380, 2380, 2000], [
-  ["Kod boyutu", "Süre @9600", "Süre @115200", "Açıklama"],
-  ["64 B", PH_cell(), PH_cell(), "ölçüm"],
-  ["256 B", PH_cell(), PH_cell(), "ölçüm"],
-  ["1 KB", PH_cell(), PH_cell(), "ölçüm"],
+  "tahmin: süre ≈ (toplam_bayt × 10 bit) / baud + ACK gecikmeleri. Aşağıdaki tablodaki " +
+  "9600 baud değerleri board üzerinde host_loader.py'nin zaman damgalarıyla ölçülerek " +
+  "doldurulacaktır (PÇ7)."));
+body.push(TABLE([2400, 2560, 2400, 2000], [
+  ["Kod boyutu", "Süre @9600 (ölçülen)", "Süre @115200", "Açıklama"],
+  ["64 B", PH_cell(), "tamamlanamadı*", "9600'de stabil"],
+  ["256 B", PH_cell(), "tamamlanamadı*", "9600'de stabil"],
+  ["1 KB", PH_cell(), "tamamlanamadı*", "9600'de stabil"],
 ]));
-body.push(CAP("Tablo 3.3. Yükleme süresi vs kod boyutu (board ölçümleriyle doldurulacak)."));
+body.push(CAP("Tablo 3.3. Yükleme süresi vs kod boyutu. *115200 için aşağıdaki nota bakınız."));
+body.push(P([R("115200 baud notu: ", { bold: true }),
+  R("115200 baud denemelerinde host tarafı bu hızda çalıştırılmış; ancak UART baud hızı " +
+  "FPGA tarafında sentez zamanında sabitlenen bir parametredir (soc_top.v içinde " +
+  "UART_BAUD; uart.v içinde bölücü DIV = CLK_FREQ / BAUD). Mevcut bitstream 9600 baud'a " +
+  "göre üretildiğinden, host 115200'e ayarlandığında FPGA hâlâ 9600 bekler ve hız " +
+  "uyumsuzluğu oluşur; bu durumda alınan baytlar bit zamanlamasına oturmadığı için geçerli " +
+  "SYNC/CRC üretilemez, paketler ACK alamaz ve yükleme tamamlanamaz. 115200 ölçümü için " +
+  "FPGA'daki UART_BAUD parametresinin 115200'e çekilip projenin yeniden sentezlenmesi " +
+  "(synthesis) ve bitstream'in tekrar yüklenmesi gerekir. Bu nedenle bu raporda gerçek " +
+  "donanım ölçümleri 9600 baud için verilmiştir (PÇ7).")]));
 body.push(P([R("FPGA kaynak tüketimi (Gowin sentez + Place&Route raporundan): ", {}),
   PH("[LUT: __ / 8640, Register/FF: __ / 6480, BSRAM: __ / 26 blok, Fmax: __ MHz]"),
   R(". Bu değerler Gowin IDE'nin sentez raporundan alınarak yazılacaktır. Loader + UART + " +
   "GPIO + 16 KB BRAM içeren tam SoC, GW1NR-9'un kapasitesinin küçük bir kısmını kullanır " +
   "(PÇ7).")]));
-body.push(P("Analiz: Yükleme süresinin temel darboğazı UART baud hızıdır; 9600'den " +
-  "115200'e geçiş yükleme süresini yaklaşık 12 kat kısaltır. Loader'ın kendisi (328 bayt) " +
+body.push(P("Analiz: Yükleme süresinin temel darboğazı UART baud hızıdır. Teorik olarak " +
+  "9600'den 115200'e geçiş yükleme süresini yaklaşık 12 kat kısaltır; ancak bu kazanç " +
+  "fiziksel olarak yalnızca FPGA UART yapılandırması da 115200'e göre yeniden " +
+  "sentezlendiğinde gözlemlenebilir (yukarıdaki not). Loader'ın kendisi (328 bayt) " +
   "bitstream'e gömülü olduğundan yükleme süresine dâhil değildir; yalnızca uygulama " +
   "kodunun boyutu belirleyicidir (PÇ7)."));
 

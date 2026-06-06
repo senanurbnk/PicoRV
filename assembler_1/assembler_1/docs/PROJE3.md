@@ -462,8 +462,13 @@ python host/host_loader.py --port COM5 --baud 9600 --bin apps/t1_arith_led.bin \
 ## 16. Toplanacak Metrikler (rapor §3.2 için board'dan)
 
 - **Kod boyutları:** loader 328B/82 komut; echo 44B; T1 24B, T2 36B, T3 44B.
-- **Yükleme süresi vs boyut:** `host_loader.py -v` zaman damgası; 9600 vs 115200 karşılaştırması.
-  Teorik: süre ≈ (toplam_bayt × 10 bit) / baud + ACK gecikmesi.
+- **Yükleme süresi vs boyut:** `host_loader.py -v` zaman damgası. Gerçek ölçümler **9600 baud**
+  için verilir. Teorik: süre ≈ (toplam_bayt × 10 bit) / baud + ACK gecikmesi.
+  - **115200 NOTU:** Baud, FPGA'da sentez zamanında sabit bir parametredir (soc_top.v `UART_BAUD`,
+    uart.v `DIV=CLK_FREQ/BAUD`). Mevcut bitstream 9600'e göre üretildiği için host'u tek başına
+    115200 yapmak hız uyumsuzluğu → ACK yok → yükleme tamamlanamaz. 115200 ölçümü için
+    `UART_BAUD=115200` yapıp **yeniden sentez + bitstream yükleme** gerekir. Bu nedenle rapor
+    ölçümleri 9600'dedir. (Raporda Tablo 3.3 altına bu not eklendi.)
 - **FPGA kaynak kullanımı:** Gowin sentez+P&R raporundan LUT / FF / BSRAM (GW1NR-9:
   ~8640 LUT4, ~6480 FF, ~468 Kbit BSRAM). Gerçek yüzdeleri Gowin raporundan al.
 
