@@ -104,9 +104,10 @@ body.push(P([R("Hedef Donanım: Sipeed Tang Nano 9K (Gowin GW1NR-9)", {})],
 body.push(P([R("Çekirdek: PicoRV32 (RV32I) — Araç zinciri: Özgün Python toolchain", {})],
   { align: AlignmentType.CENTER, after: 600 }));
 body.push(P([R("Grup Üyeleri:", { bold: true })], { align: AlignmentType.CENTER, after: 40 }));
-body.push(P([PH("[Ad Soyad — Öğrenci No]"), R("   ")], { align: AlignmentType.CENTER, after: 20 }));
-body.push(P([PH("[Ad Soyad — Öğrenci No]")], { align: AlignmentType.CENTER, after: 20 }));
-body.push(P([PH("[Ad Soyad — Öğrenci No]")], { align: AlignmentType.CENTER, after: 400 }));
+body.push(P([R("Fatih Karaca — "), PH("[Öğrenci No]")], { align: AlignmentType.CENTER, after: 20 }));
+body.push(P([R("Şeyma Keser — "), PH("[Öğrenci No]")], { align: AlignmentType.CENTER, after: 20 }));
+body.push(P([R("Senanur Binek — "), PH("[Öğrenci No]")], { align: AlignmentType.CENTER, after: 20 }));
+body.push(P([R("Recep Sami Yeşersin — "), PH("[Öğrenci No]")], { align: AlignmentType.CENTER, after: 400 }));
 body.push(P([R("Haziran 2026", {})], { align: AlignmentType.CENTER, after: 0 }));
 body.push(new Paragraph({ children: [new PageBreak()] }));
 
@@ -444,19 +445,22 @@ body.push(P("FPGA tabanlı ve loader üzerinden uzaktan güncellenebilen (OTA) b
 // ================= 5. PROJE YONETIMI =================
 body.push(H1("5. PROJE YÖNETİMİ VE TAKIM ÇALIŞMASI"));
 body.push(H2("5.1. Görev Dağılımı ve Sorumluluk Matrisi"));
-body.push(P([R("Aşağıdaki RACI matrisi takım içi iş bölümünü göstermektedir " +
-  "(R=Sorumlu, A=Onaylayan, C=Danışılan, I=Bilgilendirilen). Üye adları ve harfler " +
-  "takımca doldurulacaktır (PÇ12, PÇ13): ", {}), PH("[üyeleri yazın]")]));
-body.push(TABLE([3360, 2000, 2000, 2000], [
-  ["İş paketi", "Üye 1", "Üye 2", "Üye 3"],
-  ["Assembler genişletme (XOR/XORI/LBU)", PH_cell(), PH_cell(), PH_cell()],
-  ["Host yazılımı + CRC + paket", PH_cell(), PH_cell(), PH_cell()],
-  ["UART/SoC (Verilog)", PH_cell(), PH_cell(), PH_cell()],
-  ["Loader (RV32I) + ISS doğrulama", PH_cell(), PH_cell(), PH_cell()],
-  ["Test programları + board demo", PH_cell(), PH_cell(), PH_cell()],
-  ["Rapor + sunum", PH_cell(), PH_cell(), PH_cell()],
+body.push(P("Takım içi iş bölümü Tablo 5.1'deki RACI matrisi ile gösterilmiştir " +
+  "(R = Sorumlu/yürüten, A = Onaylayan/gözden geçiren, C = Danışılan, I = Bilgilendirilen). " +
+  "Her iş paketinde dört rol de birer üyeye atanmış ve her üye en az bir pakette doğrudan " +
+  "sorumlu (R) olacak biçimde yük dengeli dağıtılmıştır. Üyeler: Fatih Karaca, Şeyma Keser, " +
+  "Senanur Binek ve Recep Sami Yeşersin (PÇ12, PÇ13)."));
+body.push(TABLE([3360, 1500, 1500, 1500, 1500], [
+  ["İş paketi", "Fatih", "Şeyma", "Senanur", "Recep Sami"],
+  ["Assembler genişletme (XOR/XORI/LBU)", "R", "A", "C", "I"],
+  ["Host yazılımı + CRC + paket",          "C", "I", "R", "A"],
+  ["UART / SoC (Verilog)",                 "A", "C", "I", "R"],
+  ["Loader (RV32I) + ISS doğrulama",       "I", "R", "A", "C"],
+  ["Test programları + board demo",        "A", "C", "R", "I"],
+  ["Rapor + sunum",                        "C", "R", "I", "A"],
 ]));
-body.push(CAP("Tablo 5.1. RACI sorumluluk matrisi (takımca doldurulacak)."));
+body.push(CAP("Tablo 5.1. RACI sorumluluk matrisi "
+  + "(R=Sorumlu, A=Onaylayan, C=Danışılan, I=Bilgilendirilen)."));
 body.push(P("Projenin fazlı zaman çizelgesi Şekil 5.1'de verilmiştir; donanım fazları " +
   "(UART/SoC ve loader) öne alınarak entegrasyon riski erken yönetilmiştir (PÇ13)."));
 body.push(...IMG("fig_gantt.png", 600, 257, "Şekil 5.1. Proje 3 fazlı zaman çizelgesi (Gantt)."));
@@ -477,11 +481,12 @@ body.push(H1("6. BİREYSEL KATKI BEYANI"));
 body.push(P("Bu bölüm her öğrenci tarafından ayrı ayrı doldurulacak ve imzalanacaktır. " +
   "\"Grup çalışmasından bağımsız olarak hangi spesifik modülleri tek başıma tasarladım? " +
   "Bu süreçte karşılaştığım ve tek başıma çözdüğüm en büyük teknik problem neydi?\""));
-for (let i = 1; i <= 3; i++) {
-  body.push(H3(`Öğrenci ${i}`));
-  body.push(P([PH("[Ad Soyad — Öğrenci No]")], { after: 60 }));
-  body.push(P([PH("[Bağımsız tasarladığım modül(ler) ve çözdüğüm en büyük teknik problem — " +
-    "detaylıca yazın.]")], { after: 60 }));
+const uyeler = ["Fatih Karaca", "Şeyma Keser", "Senanur Binek", "Recep Sami Yeşersin"];
+for (const ad of uyeler) {
+  body.push(H3(ad));
+  body.push(P([R("Öğrenci No: "), PH("[Öğrenci No]")], { after: 60 }));
+  body.push(P([PH("[Bağımsız tasarladığım modül(ler) ve bu süreçte tek başıma çözdüğüm en " +
+    "büyük teknik problem — detaylıca yazın.]")], { after: 60 }));
   body.push(P([R("İmza: ", {}), PH("________________")], { after: 160 }));
 }
 
